@@ -1,0 +1,239 @@
+===================================================================================================
+Redis概念
+===================================================================================================
+	Redis是远程的；
+	Redis是基于内存的；
+	Redis是非关系型数据库。
+	----------------------------------------------------------
+	应用场景： 缓存  队列  数据存储
+	
+===================================================================================================
+Redis安装
+===================================================================================================
+	注意：预装软件gcc和tcl: yum install gcc 和 yum install tcl 即可。
+	----------------------------------------------------------
+	下载编译：
+		$ wget http://download.redis.io/releases/redis-3.2.8.tar.gz
+		$ tar xzf redis-3.2.8.tar.gz
+		$ cd redis-3.2.8
+		$ make			
+	补充：可以再执行 make install 命令，将编译的二进制文件放入bin目录中，以便后面可以直接运行 redis-server 和 redis-cli。执行 which redis-server 可以查看到安装到/usr/local/bin/redis-server。 
+	编译的二进制文件放在src目录，运行redis-server:
+		$ src/redis-server
+	打开一个新终端，运行redis-cli:
+		$ src/redis-cli
+		redis> set foo bar
+		OK
+		redis> get foo
+		"bar"
+	----------------------------------------------------------
+	补充：注意上面这种方式启动redis使用的是默认配置。也可以通过启动参数告诉redis使用指定配置文件：
+	[root@localhost redis-3.2.8]# redis-server --help					#查看用法
+	[root@localhost redis-3.2.8]# vi redis.conf 						#打开配置文件，将daemonize no修改成daemonize yes表示后台运行（还可以修改掉默认端口port 6379等）
+	[root@localhost redis-3.2.8]# cp redis.conf redis.conf.copy 		#这里为了不改动原配置，复制了一份配置文件再修改的
+	[root@localhost redis-3.2.8]# vi redis.conf.copy 
+	[root@localhost redis-3.2.8]# redis-server redis.conf.copy 			#运行服务端redis-server（使用了指定配置文件，后台运行）
+	[root@localhost redis-3.2.8]# ps aux|grep redis-server				#检查确实已经运行了redis-server
+	root      10308  0.0  0.7 133536  7540 ?        Ssl  07:00   0:00 redis-server 127.0.0.1:6379 
+	root      10326  0.0  0.0 103316   844 pts/2    S+   07:01   0:00 grep redis-server
+	[root@localhost redis-3.2.8]# redis-cli								#运行客户端redis-cli（若配置文件修改了默认端口6379，那么需要指定主机和端口如redis-cli -h 127.0.0.1 -p 7200）
+	127.0.0.1:6379> set foo bar											#测试redis，退出时按ctrl+c
+	OK
+	127.0.0.1:6379> get foo
+	"bar"
+	127.0.0.1:6379> 
+	[root@localhost redis-3.2.8]# 
+
+===================================================================================================
+Redis数据类型
+===================================================================================================
+	数据类型	存储的值														读写能力
+	-------------------------------------------------------------------------------------------------------------------------
+	String		可以是字符串、整数或浮点，统称为元素							对字符串操作；对整数类型加减
+	List		有序集合存储多个元素，可有相同的元素							序列两段推入或弹出元素；修剪、查找或移除元素
+	Set			无序集合存储多个各不相同的元素									从集合中插入或删除元素
+	Hash		有key-value的散列组，key是字符串，value是元素					按照key进行增加或删除
+	Sorted Set	带分数的score-value有序集合，score为浮点，value为元素且要唯一	集合插入，按照分数范围查找		
+	--------------------------------------------------------------------------------------------------------------------------
+	string类型：
+		key 	value(string/int/float)
+		演示：
+		[root@localhost software]# redis-cli -h 127.0.0.1 -p 6379
+		127.0.0.1:6379> set string1 helloWorld
+		OK
+		127.0.0.1:6379> get string1
+		"helloWorld"
+		127.0.0.1:6379> set string2 4
+		OK
+		127.0.0.1:6379> get string2
+		"4"
+		127.0.0.1:6379> incr string2			#自增用incr；加几用incrby
+		(integer) 5
+		127.0.0.1:6379> get string2
+		"5"
+		127.0.0.1:6379> decrby string2 2		#自减用decr；减几用decrby
+		(integer) 3
+		127.0.0.1:6379> get string2
+		"3"
+		127.0.0.1:6379> del string2				#删除缓存
+		(integer) 1
+		127.0.0.1:6379> get string2
+		(nil)
+		127.0.0.1:6379> setex string3 10 hello  #设置10秒有效期
+		127.0.0.1:6379> get string3
+		(nil)
+		127.0.0.1:6379> 
+	----------------------------------------------------------
+	list类型：
+		key     value(12) 左
+				value(13)
+				value(13)
+				value(14) 右
+		演示：
+		127.0.0.1:6379> lpush list1 12
+		(integer) 1
+		127.0.0.1:6379> lpush list1 13
+		(integer) 2
+		127.0.0.1:6379> rpop list1
+		"12"
+		127.0.0.1:6379> 
+		127.0.0.1:6379> lpush list2 12
+		(integer) 1
+		127.0.0.1:6379> lpush list2 13
+		(integer) 2
+		127.0.0.1:6379> lpush list2 13
+		(integer) 3
+		127.0.0.1:6379> llen list2
+		(integer) 3
+		127.0.0.1:6379> 
+	----------------------------------------------------------
+	set类型：
+		key     value(12)
+				value(13)
+				value(14)
+				value(15)
+		演示：
+		127.0.0.1:6379> sadd set1 12
+		(integer) 1
+		127.0.0.1:6379> sadd set1 13
+		(integer) 1
+		127.0.0.1:6379> scard set1
+		(integer) 2
+		127.0.0.1:6379> sadd set1 13
+		(integer) 0
+		127.0.0.1:6379> scard set1
+		(integer) 2
+		127.0.0.1:6379> 
+		127.0.0.1:6379> sismember set1 13		#是否是集合元素
+		(integer) 1
+		127.0.0.1:6379> srem set1 13
+		(integer) 1
+		127.0.0.1:6379> sismember set1 13
+		(integer) 0
+		127.0.0.1:6379> 
+	----------------------------------------------------------
+	hash类型：
+		key		key1	value(string/int/float)
+				key2	value(string/int/float)
+				key3	value(string/int/float)
+				key4	value(string/int/float)
+		演示：
+		127.0.0.1:6379> hset hash1 key1 12
+		(integer) 1
+		127.0.0.1:6379> hget hash1 key1
+		"12"
+		127.0.0.1:6379> hset hash1 key2 13
+		(integer) 1
+		127.0.0.1:6379> hset hash1 key3 13
+		(integer) 1
+		127.0.0.1:6379> hlen hash1
+		(integer) 3
+		127.0.0.1:6379> hset hash1 key3 14
+		(integer) 0
+		127.0.0.1:6379> hget hash1 key3
+		"14"
+		127.0.0.1:6379> hmget hash1  key1 key3
+		1) "12"
+		2) "14"
+		127.0.0.1:6379> 
+	----------------------------------------------------------
+	sorted set类型：
+		key		score(10.1)		value(string/int/float)		rank:1
+				score(9.2)		value(string/int/float)		rank:0
+				score(11.2)		value(string/int/float)		rank:2
+		演示：
+	127.0.0.1:6379> zadd zset1 10.1 val1
+	(integer) 1
+	127.0.0.1:6379> zadd zset1 11.2 val2
+	(integer) 1
+	127.0.0.1:6379> zadd zset1 9.2 val3
+	(integer) 1
+	127.0.0.1:6379> zcard zset1
+	(integer) 3
+	127.0.0.1:6379> zrange zset1 0 2 withscores			#列出0-2排名并显示分数
+	1) "val3"
+	2) "9.1999999999999993"
+	3) "val1"
+	4) "10.1"
+	5) "val2"
+	6) "11.199999999999999"
+	127.0.0.1:6379> zrank zset1 val2
+	(integer) 2
+	127.0.0.1:6379> zadd zset1 12.2 val3				#将val3的分数改为12.2
+	(integer) 0
+	127.0.0.1:6379> zrange zset1 0 2 withscores
+	1) "val1"
+	2) "10.1"
+	3) "val2"
+	4) "11.199999999999999"
+	5) "val3"
+	6) "12.199999999999999"
+	127.0.0.1:6379> zadd zset1 12.2 val2				#将val2的分数也改为12.2，分数相同时按value排名
+	(integer) 0
+	127.0.0.1:6379> zrange zset1 0 2 withscores
+	1) "val1"
+	2) "10.1"
+	3) "val2"
+	4) "12.199999999999999"
+	5) "val3"
+	6) "12.199999999999999"
+	127.0.0.1:6379> 
+
+===================================================================================================
+PHP安装Redis扩展
+===================================================================================================
+	wget https://github.com/phpredis/phpredis/archive/develop.zip
+	unzip develop.zip
+	cd phpredis-develop/
+	phpize
+	./configure --with-php-config=/usr/bin/php-config
+	make && make install
+	最后记得要在/etc/php.ini中添加extension=redis.so	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+	
