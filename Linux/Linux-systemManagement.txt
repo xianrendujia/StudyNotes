@@ -1,0 +1,662 @@
+=======================================================================================================
+一、进程管理
+=======================================================================================================
+	1、查看进程
+	1.1 ps命令
+	ps aux  查看系统中所有进程（使用BSD操作系统格式）
+	ps -le  查看系统中所有进程（使用Linux标准命令格式）
+	
+	选项：
+	a: 显示一个终端的所有进程，除了会话引线
+	u: 显示经常的归属用户及内存的使用情况
+	x: 显示没有控制终端的进程
+	-l: 长格式显示。显示更详细信息
+	-e: 显示所有进程，个-A作用一致
+	
+	[root@localhost ~]# ps aux
+	USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+	root          1  0.0  0.1  19364  1552 ?        Ss   Apr24   0:02 /sbin/init
+	root          2  0.0  0.0      0     0 ?        S    Apr24   0:00 [kthreadd]
+	root          3  0.0  0.0      0     0 ?        S    Apr24   0:00 [migration/0]
+	
+	释义：
+	USER: 该进程是由哪个用户产生的
+	PID:  进程的ID号
+	%CPU: 该进程占用CPU资源的百分比。占用越高，进程越耗费资源
+	%MEM: 该进程占用物理内存的百分比。占用越高，进程越耗费资源
+	VSZ:  该进程占用虚拟内存的大小，单位KB
+	RSS:  该进程占用实际物理内存的大小，单位KB
+	TTY:  该进程是在哪个终端中运行的。其中tty1-tty7代表本地控制终端，tty1-tty6是本地的字符界面终端，tty7是图形终端。pts/0-255代表远程登陆。
+	STAT: 该进程状态。常见有： R运行 S睡眠  T停止 s包含子进程  +位于后台
+	START: 该进程的启动时间
+	TIME:  该进程占用CPU的运算时间，注意不是系统时间。
+	COMMAND: 产生该进程的命令名。
+	
+	可以结合管道符使用，比如只查看httpd相关进程：
+	[root@localhost ~]# ps aux | grep httpd
+	root       2064  0.0  1.3 315040 13204 ?        Ss   Apr24   0:17 /usr/sbin/httpd
+	apache     4482  0.0  0.6 315040  6852 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4483  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4484  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4485  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4486  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4487  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4488  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	apache     4489  0.0  0.6 315040  6828 ?        S    Apr25   0:00 /usr/sbin/httpd
+	root      19299  0.0  0.0 103320   848 pts/2    S+   19:30   0:00 grep httpd
+	----------------------------------------------------------
+	1.2 pstree命令
+	选项：
+	-p: 显示进程号PID
+	-u: 显示进程所属用户
+	
+	[root@localhost ~]# pstree
+	init─┬─NetworkManager
+		 ├─abrtd
+		 ├─acpid
+		 ├─atd
+		 ├─httpd───8*[httpd]
+		 ├─master─┬─pickup
+		 │        └─qmgr
+		 ├─seahorse-daemon
+		 ├─sshd─┬─sshd───bash───redis-cli
+		 │      ├─sshd───bash───vim
+		 │      └─sshd───bash───pstree
+		 ├─wpa_supplicant
+		 └─xinetd
+	... ...
+	----------------------------------------------------------
+	1.3 top命令
+	选项：
+	-d: 指定top命令每隔几秒更新，默认是3秒
+	-b: 使用批处理模式输出，一般和"-n"选项合用
+	-n: 指定top命令执行的次数，一般和"-b"选项合用
+	
+	在top命令的交互模式当中可执行命令：
+	?或h: 显示交互模式的帮助
+	P: 以CPU使用率排序，默认就是此项
+	M: 以内存使用率排序
+	N: 以进程号PID排序
+	q: 退出top
+	
+	[root@localhost ~]# top
+	top - 18:25:53 up 2 days, 20:37,  2 users,  load average: 0.00, 0.00, 0.00
+	Tasks: 156 total,   1 running, 155 sleeping,   0 stopped,   0 zombie
+	Cpu(s):  0.0%us,  0.3%sy,  0.0%ni, 99.3%id,  0.0%wa,  0.0%hi,  0.3%si,  0.0%st
+	Mem:   1004132k total,   926696k used,    77436k free,   130660k buffers
+	Swap:  2097148k total,        8k used,  2097140k free,   408920k cached
+	                                                                                                                                  
+    PID USER     PR  NI  VIRT  RES  SHR S %CPU %MEM  TIME+  COMMAND                                                                                                                               
+     1 root      20   0 19364 1552 1232 S  0.0  0.2   0:02.60 init                                                                                                                                          
+     2 root      20   0     0    0    0 S  0.0  0.0   0:00.00 kthreadd                                                                                                                                   
+     3 root      RT   0     0    0    0 S  0.0  0.0   0:00.00 migration/0                                                                                                                                        
+	
+	顶部5行信息释义：
+	（1）系统当前时间  已经运行2天20小时37分钟  当前登陆了2个用户  系统在之前1/5/15分钟的平均负载
+	（2）系统中进程总数 正运行进程数  睡眠进程数  正停止进程数  僵尸进程数
+	（3）CPU使用情况： 0.0%us是用户模式占比  0.3%sy是系统模式占比  0.0%ni是改变过优先级的用户进程占比  
+		99.3%id是空闲cpu占比（一般不低于20%否则很卡） 0.0%wa是等待输入/输出的进程占比  
+		0.0%hi是硬中断请求服务占比 0.3%si是软中断请求服务占比  0.0%st是st(steal time)虚拟时间占比
+	（4）内存使用情况：    物理内存总量  已用量  空闲量  作为缓冲的内存数量（缓冲是加速数据的写入）
+	（4）交换分区使用情况：交换分区总量  已用量  空闲量  作为缓存的交换分区数量（缓存是加速数据的读取）
+	
+	若要使用top查看所有进程：top -b -n 1 > /root/testTop.log
+	===========================================================
+	2、杀死进程
+	2.1 kill命令
+	kill -l   		#查看所有进程信号
+	kill -1 2345  	#平滑重启进程
+	kill -9 2345  	#强制杀死进程
+	注：kill只能杀死单个进程且是用PID进程号。若要杀死多个使用killall或pkill，但要用进程名。
+	----------------------------------------------------------
+	2.2 killall命令
+	killall [信号] [选项] 进程名   #按进程名杀死进程
+	-i 交互式，每次询问是否确认杀死某进程
+	-I 忽略进程名的大小写
+	[root@localhost ~]# killall -9 -i httpd
+	Signal httpd(2064) ? (y/N) y
+	Signal httpd(4482) ? (y/N) y
+	Signal httpd(4483) ? (y/N) y
+	Signal httpd(4484) ? (y/N) y
+	Signal httpd(4486) ? (y/N) y
+	Signal httpd(4487) ? (y/N) y
+	Signal httpd(4488) ? (y/N) y
+	Signal httpd(4489) ? (y/N) y
+	[root@localhost ~]# ps aux | grep httpd
+	root      19328  0.0  0.0 103316   844 pts/2    S+   19:40   0:00 grep httpd
+	[root@localhost ~]# service httpd start
+	Starting httpd:                                            [  OK  ]
+	[root@localhost ~]# ps aux | grep httpd
+	root      19346  1.5  1.1 314960 11132 ?        Ss   19:41   0:00 /usr/sbin/httpd
+	apache    19349  0.0  0.6 314960  6152 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19350  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19351  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19352  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19353  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19354  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19355  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	apache    19356  0.0  0.6 314960  6128 ?        S    19:41   0:00 /usr/sbin/httpd
+	root      19358  0.0  0.0 103316   840 pts/2    S+   19:41   0:00 grep httpd
+	[root@localhost ~]# 
+	----------------------------------------------------------
+	2.3 pkill命令
+	pkill [信号] [选项] 进程名  #按进程名杀死进程
+	-t 指定开启进程的终端号，可按终端号踢出用户（一般先执行w命令查看登陆用户再pkill用户）
+	[root@localhost ~]# w
+	 19:52:24 up 2 days, 22:03,  3 users,  load average: 0.00, 0.00, 0.00
+	USER     TTY      FROM              LOGIN@   IDLE   JCPU   PCPU WHAT
+	root     tty1     :0               Mon21    2days  9.87s  9.87s /usr/bin/Xorg :0 -br -verbose -audit 4 -auth /var/run/gdm/auth-for-gdm-KYcZoh/database -nolisten tcp vt1
+	chengwk  pts/0    192.168.1.106    19:50    1:34   0.02s  0.02s -bash
+	root     pts/2    192.168.1.106    17:08    0.00s  0.12s  0.00s w
+	[root@localhost ~]# pkill -9 -t tty1
+	[root@localhost ~]# pkill -9 -t pts/0
+	[root@localhost ~]# w
+	 19:54:34 up 2 days, 22:05,  1 user,  load average: 0.02, 0.01, 0.00
+	USER     TTY      FROM              LOGIN@   IDLE   JCPU   PCPU WHAT
+	root     pts/2    192.168.1.106    17:08    0.00s  0.16s  0.01s w
+	[root@localhost ~]# 
+	===========================================================
+	3、修改进程优先级
+	查看进程优先级，执行 ps -le 命令。其中PRI代表priority，NI代表nice。这两个都是优先级，数字越小优先级越高。
+	[root@localhost ~]# ps -le | more
+	F S   UID    PID   PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+	4 S     0      1      0  0  80   0 -  4841 poll_s ?        00:00:02 init
+	1 S     0      2      0  0  80   0 -     0 kthrea ?        00:00:00 kthreadd
+	1 S     0      3      2  0 -40   - -     0 migrat ?        00:00:00 migration/0
+	1 S     0      4      2  0  80   0 -     0 ksofti ?        00:00:03 ksoftirqd/0
+
+	注意：
+	用户只能修改NI的值，而不能直接修改PRI。
+	NI值得范围是：-20~19。
+	普通用户调整NI值的范围是0~19，而且只能调高NI值而不能调低，而且只能调整自己的进程。
+	root用户才能设定进程NI值为负数，而且可以调整任何用户的进程。
+	最终PRI = 原始PRI + NI。
+	----------------------------------------------------------
+	3.1 nice命令
+	#nice命令可以给新执行的命令直接赋予NI值，但是不能修改已经存在进程的NI值。
+	选项：
+	-n NI值： 给命令赋予NI值
+	nice -n -5 service httpd start
+	----------------------------------------------------------
+	3.2 renice命令
+	renice [优先级] PID
+	#renice命令修改已经存在进程的NI值
+	renice -10 2125
+	
+	演示：
+	[root@localhost ~]# ps -le | grep httpd
+	1 S     0  19346      1  0  80   0 - 78740 poll_s ?        00:00:00 httpd
+	5 S    48  19349  19346  0  80   0 - 78740 inet_c ?        00:00:00 httpd
+	5 S    48  19350  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19351  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19352  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19353  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19354  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19355  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19356  19346  0  80   0 - 78740 semtim ?        00:00:00 httpd
+	[root@localhost ~]# nice -n -5 service httpd restart
+	Stopping httpd:                                            [  OK  ]
+	Starting httpd:                                            [  OK  ]
+	[root@localhost ~]# ps -le | grep httpd
+	1 S     0  19638      1  1  75  -5 - 78740 poll_s ?        00:00:00 httpd
+	5 S    48  19641  19638  0  75  -5 - 78740 inet_c ?        00:00:00 httpd
+	5 S    48  19642  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19643  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19644  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19645  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19646  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19647  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19648  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	[root@localhost ~]# renice -n -10 19645
+	19645: old priority -5, new priority -10
+	[root@localhost ~]# ps -le | grep httpd
+	1 S     0  19638      1  0  75  -5 - 78740 poll_s ?        00:00:00 httpd
+	5 S    48  19641  19638  0  75  -5 - 78740 inet_c ?        00:00:00 httpd
+	5 S    48  19642  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19643  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19644  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19645  19638  0  70 -10 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19646  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19647  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	5 S    48  19648  19638  0  75  -5 - 78740 semtim ?        00:00:00 httpd
+	[root@localhost ~]# 
+
+	
+=======================================================================================================
+二、工作管理
+=======================================================================================================
+	1、工作管理简介
+	工作管理指的是在单个登陆终端中（登陆的shell界面）同时管理多个工作的行为。
+	注意事项：
+	当前登陆终端一般只能管理当前终端的工作而不能管理其他登陆终端的工作。
+	放入后台的命令必须可以持续运行一段时间，这样我们才能捕捉和操作这个工作。
+	放入后台执行的命令不能和前台用户有交互或需要前台输入，否则放入后台只能暂停而不能执行。
+	===========================================================
+	2、工作管理方法
+	2.1 把工作放入后台
+	（1）执行命令末尾加“&”符 （放在后台执行） 比如：执行tar、cp、find等命令时用
+	（2）执行命令时按ctrl+z键（放在后台暂停）
+	----------------------------------------------------------
+	2.2 查看后台工作
+	jobs [-l]   
+	#选项-l是显示工作进程PID
+	注： “+”号代表最近一个放入后台的工作，也是工作恢复时默认恢复的工作；
+		 “-”号代表倒数第二个放入后台的工作。
+	[root@localhost ~]# jobs 
+	[1]   Stopped                 top
+	[2]-  Stopped                 top
+	[3]+  Stopped                 vi abc
+	[root@localhost ~]# jobs -l
+	[1]  19943 Stopped (tty output)    top
+	[2]- 19944 Stopped (signal)        top
+	[3]+ 19946 Stopped (tty output)    vi abc
+	----------------------------------------------------------
+	2.3 把后台暂停的工作恢复到前台执行
+	fg %工作号
+	#%工作号：%可以省略，但是注意区别工作号和PID。
+	----------------------------------------------------------
+	2.4 把后台暂停的工作恢复到后台执行
+	bg %工作号
+	注：后台恢复执行的命令，是不能和前台有交互的，否则不能恢复到后台执行。	
+	----------------------------------------------------------
+	综合演示：
+	[root@localhost ~]# top &
+	[1] 19943
+	[root@localhost ~]# top 				      
+	#之后再按ctrl+z键
+	[1]-  Stopped                 top
+	[2]+  Stopped                 top
+	[root@localhost ~]# vi abc &
+	[3] 19946
+	[root@localhost ~]# jobs 
+	#查看后台工作。注意下面3个工作虽然放在了后台但是状态却都是暂停的，是因为它们放在后台都没有意义，要么是给用户查看要么是要编辑。
+	[1]   Stopped                 top
+	[2]-  Stopped                 top
+	[3]+  Stopped                 vi abc
+	[root@localhost ~]# find / -name learnGit &   
+	#现在后台执行find命令并放入后台。后面可以看到它的状态是Running的。
+	[4] 19963
+	[root@localhost ~]# jobs
+	[1]   Stopped                 top
+	[2]-  Stopped                 top
+	[3]+  Stopped                 vi abc
+	[4]   Running                 find / -name learnGit &
+	[root@localhost ~]# /root/learnGit
+	[4]   Done                    find / -name learnGit
+	[root@localhost ~]# 
+	[root@localhost ~]# jobs
+	[1]   Stopped                 top
+	[2]-  Stopped                 top
+	[3]+  Stopped                 vi abc
+	[root@localhost ~]# 
+	[root@localhost ~]# bg 1
+	#将工作1恢复到后台工作。但是top在后台执行无意义所以还是暂停状态。
+	[1] top &
+	[root@localhost ~]# jobs
+	[1]+  Stopped                 top
+	[2]   Stopped                 top
+	[3]-  Stopped                 vi abc
+	[root@localhost ~]# fg 1
+	#将工作1恢复到前台工作。此时可以看到top命令正常执行了。
+	top
+	top - 22:57:16 up 3 days,  1:08,  1 user,  load average: 0.00, 0.00, 0.00
+	Tasks: 130 total,   1 running, 127 sleeping,   2 stopped,   0 zombie
+	Cpu(s):  0.0%us,  0.0%sy,  0.0%ni,100.0%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+	Mem:   1004132k total,   902732k used,   101400k free,   155476k buffers
+	Swap:  2097148k total,        0k used,  2097148k free,   426872k cached
+
+	PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                                                                           
+	 1919 mysql     20   0  368m  23m 3264 S  0.3  2.4   1:51.79 mysqld                                                                                                                                             
+	 17201 root      20   0  130m 7708 1272 S  0.3  0.8   1:11.18 redis-server                                                                                                                                       
+	 19943 root      20   0 15032 1248  936 R  0.3  0.1   0:00.08 top        	
+	===========================================================
+	3、后台命令脱离登陆终端
+	如mysql服务一样，关闭终端再开启其他终端时mysql服务照样运行（以守护进程方式运行）
+	后台命令脱离登陆终端执行的常见方法：
+	（1）第一种：把需要后台执行的命令加入/etc/rc.local文件。
+	（2）第二种：使用系统定时任务让系统定时执行某后台命令。
+	（3）第三种：使用nohup命令。
+	推荐第一种或第三种。
+	综合演示：
+	[root@localhost ~]# vi /root/for.sh
+	#!/bin/bash
+	for((i=0; i<=100; i=i+1))
+		do 
+			echo 1 >> /root/for.log
+			sleep 5s
+		done
+	----------------------------------------------------------
+	[root@localhost ~]# echo '/root/for.sh' >> /etc/rc.local
+	[root@localhost ~]# cat /etc/rc.local
+	#!/bin/sh
+	#
+	# This script will be executed *after* all the other init scripts.
+	# You can put your own initialization stuff in here if you don't
+	# want to do the full Sys V style init stuff.
+
+	touch /var/lock/subsys/local
+	/root/for.sh
+	[root@localhost ~]# reboot  
+	[root@localhost ~]# ps aux
+	... ...
+	root       2091  0.0  0.1 108220  1320 ?        S    02:32   0:00 /bin/bash /root/for.sh
+	root       2107  3.1  0.4 102084  4156 ?        Ds   02:32   0:00 sshd: root@pts/1 
+	root       2111  0.4  0.1 108484  1856 pts/1    Ss   02:32   0:00 -bash
+	root       2130  0.0  0.0 100916   576 ?        S    02:32   0:00 sleep 5s
+	root       2131  6.0  0.1 110244  1144 pts/1    R+   02:32   0:00 ps aux
+	测试重启系统，再登陆新终端，运行ps aux查看，可以看到进程/bin/bash /root/for.sh确实在运行。
+	----------------------------------------------------------
+	[root@localhost ~]# chmod 755 for.sh 
+	[root@localhost ~]# nohup /root/for.sh &
+	[1] 20510
+	[root@localhost ~]# nohup: ignoring input and appending output to `nohup.out'
+	[root@localhost ~]# jobs
+	[1]+  Running                 nohup /root/for.sh &
+	[root@localhost ~]# ps aux
+	... ...
+	root      20510  0.0  0.1 106112  1212 pts/2    S    01:50   0:00 /bin/bash /root/for.sh
+	root      20528  0.0  0.0 100916   576 pts/2    S    01:51   0:00 sleep 5s
+	root      20529  0.0  0.1 110244  1148 pts/2    R+   01:51   0:00 ps aux
+	测试关闭当前终端，再开启新终端，运行ps aux查看，可以看到以上进程仍然在运行。
+	
+	
+=======================================================================================================
+三、查看系统资源
+=======================================================================================================
+	1、 vmstat 监控系统资源
+	vmstat [刷新延时 刷新次数]
+	例如：每隔1秒运行一次，共运行3次。
+	[root@localhost ~]# vmstat 1 3   
+	procs -----------memory---------- ---swap-- -----io---- --system-- -----cpu-----
+	r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+	0  0      0 605656  23452 145968    0    0   110     4   40   70  0  1 99  0  0	
+	0  0      0 605608  23452 145996    0    0     0     0   22   24  0  0 100  0  0	
+	0  0      0 605608  23452 145996    0    0     0     0   16   37  0  0 100  0  0	
+	
+	释义：
+	procs: 进程信息字段：
+		- r: 等待运行的进程数，数量越大，系统越繁忙。
+		- b: 不可被唤醒的进程数，数量越大，系统越繁忙。
+	memory: 内存信息字段：
+		- swpd:  虚拟内存的使用情况，单位KB
+		- free:  空闲的内存容量，单位KB
+		- buff:  缓冲的内存容量，单位KB
+		- cache: 缓存的内存容量，单位KB
+	swap: 交换分区的信息字段：
+		- si: 从磁盘中交换到内存中数据的数量，单位KB。
+		- so: 从内存中交换到磁盘中数据的数量，单位KB。
+		此两个数越大，证明数据需要经常在磁盘和内存之间交换，系统性能越差。
+	io: 磁盘读写信息字段：
+		- bi: 从块设备读入数据的总量，单位是块。
+		- bo：写到块设备的数据的总量，单位是块。
+		此两个数越大，代表系统的I/O越繁忙。
+	system: 系统信息字段：
+		- in: 每秒被中断的进程次数。
+		- cs: 每秒进行的事件切换次数。
+		此两个数越大，代表系统与接口设备的通信越繁忙。
+	cpu: cpu信息字段：
+		- us: 非内核进程消耗cpu运算时间的百分比。
+		- sy: 内核进程消耗cpu运算时间的百分比。
+		- id: 空闲cpu的百分比。
+		- wa: 等待I/O所消耗的cpu的百分比。
+		- st: 被虚拟机所盗用的cpu的百分比。
+	===========================================================
+	2、 dmesg 开机时内核检测信息
+	例如：查看cpu信息。
+	[root@localhost ~]# dmesg | grep CPU
+	SMP: Allowing 128 CPUs, 127 hotplug CPUs
+	NR_CPUS:4096 nr_cpumask_bits:128 nr_cpu_ids:128 nr_node_ids:1
+	PERCPU: Embedded 31 pages/cpu @ffff880003400000 s96600 r8192 d22184 u131072
+	CPU: Physical Processor ID: 0
+	mce: CPU supports 0 MCE banks
+	CPU0: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz stepping 09
+	CPUID marked event: 'cpu cycles' unavailable
+	CPUID marked event: 'instructions' unavailable
+	CPUID marked event: 'bus cycles' unavailable
+	CPUID marked event: 'cache references' unavailable
+	CPUID marked event: 'cache misses' unavailable
+	CPUID marked event: 'branch instructions' unavailable
+	CPUID marked event: 'branch misses' unavailable
+	Brought up 1 CPUs
+	microcode: CPU0 sig=0x906e9, pf=0x1, revision=0x42
+	[root@localhost ~]# 
+	===========================================================
+	3、 free 查看内存使用状态
+	free [-b|-k|-m|-g]
+	选项：
+		-b: 以字节为单位显示
+		-k: 以KB为单位显示，默认就是此项
+		-m: 以MB为单位显示
+		-g: 以GB为单位显示
+	[root@localhost ~]# free -m
+				 total       used       free     shared    buffers     cached
+	Mem:           980        441        538          1         44        148
+	-/+ buffers/cache:        248        731
+	Swap:         2047          0       2047
+	===========================================================
+	4、 查看CPU信息 
+	cat /proc/cpuinfo
+	[root@localhost ~]# cat /proc/cpuinfo 
+	processor	: 0
+	vendor_id	: GenuineIntel
+	cpu family	: 6
+	model		: 158
+	model name	: Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+	stepping	: 9
+	microcode	: 66
+	cpu MHz		: 2807.999
+	cache size	: 6144 KB
+	physical id	: 0
+	... ...
+	===========================================================
+	5、 uptime命令 
+	显示系统的启动时间和平均负载，也就是top命令的第一行。w命令也可以看到此数据。
+	[root@localhost ~]# uptime
+	 03:53:02 up  1:21,  2 users,  load average: 0.00, 0.00, 0.00
+	[root@localhost ~]# 
+	===========================================================
+	6、 uname 查看系统与内核信息
+	选项：
+		-a: 查看系统所有相关信息
+		-r: 查看内核版本
+		-s: 查看内核名称
+	[root@localhost ~]# uname -a
+	Linux localhost.localdomain 2.6.32-642.15.1.el6.x86_64 #1 SMP Fri Feb 24 14:31:22 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+	[root@localhost ~]# uname -r
+	2.6.32-642.15.1.el6.x86_64
+	[root@localhost ~]# 
+	（1）补充1：判断当前Linux系统的位数： file 外部命令
+	[root@localhost ~]# file /bin/ls
+	/bin/ls: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.18, stripped
+	[root@localhost ~]# 
+	（2）补充2：查询当前Linux系统发行版本： lsb_release -a
+	[root@localhost ~]# lsb_release -a
+	LSB Version:	:base-4.0-amd64:base-4.0-noarch:core-4.0-amd64:core-4.0-noarch:graphics-4.0-amd64:graphics-4.0-noarch:printing-4.0-amd64:printing-4.0-noarch
+	Distributor ID:	CentOS
+	Description:	CentOS release 6.8 (Final)
+	Release:	6.8
+	Codename:	Final
+	[root@localhost ~]# 
+	===========================================================
+	7、 lsof 列出进程打开或调用的文件的信息
+	选项：
+		-c 字符串: 只列出以字符串开头的进程打开的文件
+		-u 用户名: 只列出某个用户的进程打开的文件
+		-p pid:	   列出某个PID进程打开的文件
+	示例：
+	lsof | more		  #查询系统所有进程调用的文件
+	lsof /sbin/init	  #查看某个文件被哪个进程调用
+	lsof -c httpd	  #查看某个进程调用了哪些文件
+	lsof -u root	  #查看root用户的进程调用的文件
+	[root@localhost ~]# lsof /sbin/init
+	COMMAND PID USER  FD   TYPE DEVICE SIZE/OFF    NODE NAME
+	init      1 root txt    REG    8,2   150352 1443228 /sbin/init
+	[root@localhost ~]# lsof -c cron
+	COMMAND  PID USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+	crond   2022 root  cwd    DIR                8,2     4096       2 /
+	crond   2022 root  rtd    DIR                8,2     4096       2 /
+	crond   2022 root  txt    REG                8,2    64096 1328089 /usr/sbin/crond
+	crond   2022 root  mem    REG                8,2    65960  393245 /lib64/libnss_files-2.12.so
+	crond   2022 root  mem    REG                8,2 99164480 1312419 /usr/lib/locale/locale-archive
+	crond   2022 root  mem    REG                8,2    12776  393420 /lib64/libfreebl3.so
+	crond   2022 root  mem    REG                8,2    43392  393426 /lib64/libcrypt-2.12.so
+	... ...
+	
+=======================================================================================================
+四、系统定时任务
+=======================================================================================================
+	1、 at 一次性定时任务
+	1.1 检查at服务是否安装：
+	chkconfig --list | grep atd
+	[root@localhost ~]# chkconfig --list | grep atd
+	atd            	0:off	1:off	2:off	3:on	4:on	5:on	6:off
+	注：其中0-6是系统runlevel运行级别。
+	若要启动at服务： service atd restart
+	----------------------------------------------------------
+	1.2 at服务的访问控制
+	（1）如果系统中存在/etc/at.allow文件（白名单），那么只有写入此文件的用户才能使用at命令。
+	（2）如果系统中只有/etc/at.deny文件（黑名单），那么写入此文件的用户不能使用at命令（root除外）。
+	（3）如果系统中这两个文件都不存在，那么只有root用户可以使用at命令。
+	[root@localhost ~]# ls /etc/at*
+	/etc/at.deny
+	----------------------------------------------------------
+	1.3 at 用法
+	at [选项] 时间
+	选项：
+		-m: 当at工作完成后，无论是否命令有输出，都用email通知执行at命令的用户。
+		-c 工作号: 显示该at工作的实际内容。
+	时间：
+		HH:MM											例如：02:30
+		HH:MM YYYY-MM-DD								例如：02:30 2013-07-25
+		HH:MM[am|pm] [month] [date]						例如：02:30 July 25
+		HH:MM[am|pm] + [minutes|hours|days|weeks]		例如：now + 5 minutes
+	atq  查询当前服务器上的at工作
+	atrm [工作号] 删除指定的at任务
+	示例：	
+	[root@localhost ~]# at now + 3 minutes
+	at> date >> date.log						#输入任务内容。若输错按ctrl+退格删除。
+	at> <EOT>									#按ctrl+d保存任务
+	job 4 at 2017-04-28 04:56
+	[root@localhost ~]# atq						#查看at任务
+	4	2017-04-28 04:56 a root
+	[root@localhost ~]# at -c 4					#查看at工作的实际内容
+	... ...
+	[root@localhost ~]# cat date.log 
+	Fri Apr 28 04:56:00 CST 2017
+	[root@localhost ~]# atq
+	[root@localhost ~]#	
+	===========================================================
+	2. crontab 循环定时任务
+	2.1 crontab服务管理和访问控制
+	[root@localhost ~]# chkconfig --list | grep cron
+	crond          	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+	若要启动crontab服务：
+	service	crond restart
+	chkconfig crond on
+	查看访问控制时也只有/etc/cron.deny文件（参考at访问控制）。
+	----------------------------------------------------------
+	2.2 crontab 用法
+	crontab -e    #编辑crontab任务
+	crontab -l    #列出crontab任务
+	crontab -r    #清除所有crontab任务
+	
+	注意格式：
+	.---------------- minute (0 - 59)
+	|  .------------- hour (0 - 23)
+	|  |  .---------- day of month (1 - 31)
+	|  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+	|  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+	|  |  |  |  |
+	*  *  *  *  *  command
+	
+	45 22 * * * command     #每天22点45分执行命令
+	0  17 * * 1 command		#每周一的下午五点整执行命令（“*”表任意时间，注意几点整首位写0而不是*）
+	0  5  1,15 * * command	#每月的1日和15日的凌晨5点整执行命令（“,”表不连续时间）
+	40 4 * * 1-5 command    #每周一到周五的凌晨4点40分执行命令（“-”表连续时间范围）
+	*/10 4 * * * command    #每天的凌晨每隔10分钟执行命令（“/”表每隔多久）
+	注意：下面这种少用，因为几号和星期几都是定义天，容易导致管理员混淆！！！
+	0 0 1,15 * 1 command  	#每月的1日和15日和每周一的零点零分都会执行命令 
+	
+	注意事项：
+	crontab定时任务，六项都必须填写。
+	crontab定时任务，最小时间单位为分钟，最大为月。
+	crontab定时任务，不管是直接写命令还是执行某脚本，最好用绝对路径。
+	
+	示例：
+	[root@localhost ~]# crontab -e
+	no crontab for root - using an empty one
+	crontab: installing new crontab
+	[root@localhost ~]# crontab -l
+	* 1-5 28 4 * echo 111111111 >> date.log 
+	[root@localhost ~]# 
+	[root@localhost ~]# cat date.log 
+	Fri Apr 28 04:56:00 CST 2017
+	111111111
+	111111111
+	[root@localhost ~]# 
+	===========================================================
+	3. 编辑 /etc/crontab 配置文件
+	“crontab -e”是每个用户身份执行自己的定时任务。但有些定时任务需要系统执行，这时就需要编辑/etc/crontab配置文件。
+	
+	注意：
+	在CentOS 5中此配置文件中写有执行cron.hourly、cron.daily、cron.monthly、cron.weekly几个目录下文件，如：
+	01 * * * * root run-parts /etc/cron.hourly
+	01 * * * * root run-parts /etc/cron.daily
+	但是发展到现在没有了，但是这几个目录还存在。可直接将你的定时任务脚本放入对应的这几个目录中，系统会自动执行。
+	注：其实这几个目录是交给下面将介绍的 anacron 管理了。
+	
+	[root@localhost ~]# vi /etc/crontab 
+	[root@localhost ~]# ls /etc/cron
+	cron.d/       cron.daily/   cron.deny     cron.hourly/  cron.monthly/ crontab       cron.weekly/
+	[root@localhost ~]# cd /etc/cron.daily/
+	[root@localhost cron.daily]# ls
+	cups  logrotate  makewhatis.cron  mlocate.cron  prelink  readahead.cron  tmpwatch
+	[root@localhost cron.daily]# 	
+	
+	总结执行定时任务的方法：
+	（1）手工执行定时任务─── at、crontab -e
+	（2）系统执行定时任务─┬─ 直接编辑/etc/crontab配置文件
+						  └─ 将定时任务脚本放入对应的/erc/cron.{hourly|daily|monthly|weekly}目录中（推荐）
+	===========================================================
+	4. anacron 配置
+	anacron是用来保证在系统关机时错过执行的定时任务，在系统开机后再执行的。
+	anacron配置文件： /etc/anacrontab
+	
+	anacron检测原理：
+	（1）anacron会使用一天、七天、一月作为检测周期；
+	（2）在/var/spool/anacron/目录存在cron.{daily|monthly|weekly}文件，用于记录上次执行任务时间；
+	（3）和当前时间作比较，若两个时间的差值超过了anacron指定的时间差值，则证明有cron任务漏执行。
+
+	示例：
+	[root@localhost cron.daily]# ls /var/spool/anacron/
+	cron.daily  cron.monthly  cron.weekly
+	[root@localhost ~]# cd /var/spool/anacron/
+	[root@localhost anacron]# cat cron.daily 
+	20170428
+	[root@localhost anacron]# 
+	[root@localhost etc]# cat /etc/anacrontab
+	# /etc/anacrontab: configuration file for anacron
+
+	# See anacron(8) and anacrontab(5) for details.
+
+	SHELL=/bin/sh
+	PATH=/sbin:/bin:/usr/sbin:/usr/bin
+	MAILTO=root
+	# the maximal random delay added to the base delay of the jobs
+	RANDOM_DELAY=45
+	# the jobs will be started during the following hours only
+	START_HOURS_RANGE=3-22
+
+	#period in days   delay in minutes   job-identifier   command
+	1				  5					 cron.daily		  nice run-parts /etc/cron.daily
+	7				  25				 cron.weekly	  nice run-parts /etc/cron.weekly
+	@monthly 		  45			     cron.monthly	  nice run-parts /etc/cron.monthly
+	[root@localhost etc]# 
+	----------------------------------------------------------
+	最后以cron.daily工作说明执行过程：
+	（1）首先读取/var/spool/anacron/cron.daily中上次anacron执行时间；
+	（2）和当前时间作比较，若两个时间的差值超过1天，就执行cron.daily工作；
+	（3）执行这个工作只能在03:00-22:00之间；
+	（4）执行工作时强制延迟时间为5分钟，再随机延迟0-45分钟时间；
+	（5）使用nice命令指定默认优先级，使用run-parts脚本执行/etc/cron.daily目录中的所以可执行文件。
+	

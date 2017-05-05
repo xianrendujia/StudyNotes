@@ -1,0 +1,468 @@
+===================================================================================================
+文件的基本权限
+===================================================================================================
+	1.文件权限的设定
+	-rw-r--r--. 1 root root    0 Mar 31 02:03 readme
+	首位是文件类型：- 普通文件  d 目录  l 软链接文件
+	rw-  	  r--   	r--
+	u所有者	  g所属组	o其他人
+	r 读	  w 写      x执行
+	----------------------------------------------------------
+	chmod [选项] [模式] [文件名]
+	选项： -R 递归
+	模式： [ugoa] [+-=] [rwx]
+		   [mode=421]
+	chmod u+x cangls.av
+	chmod g+w,o+w furong.av
+	chmod a=rwx fengjie.av
+	----------------------------------------------------------
+	权限的数字表示
+	r-----4   w-----2   x-----1
+	rwxr-xr-x 
+	  7  5  5
+	chmod 755 cangls.av
+	
+	----------------------------------------------------------
+	2. 权限的作用
+	（1）权限对文件的作用
+	r: 读取文件内容（如cat more head tail）
+	w: 编辑、新增、修改文件内容（如vi echo）
+	   但是千万注意这里不包含删除文件（要删除则要对上级目录有写权限才行）
+	x: 可执行
+	（2）权限对目录的作用
+	r: 可查询目录下文件名（ls）
+	w: 具有修改目录结构的权限。如新建文件和目录、删除此目录下文件和目录、重命名、剪切（touch rm mv cp）
+	x: 可进入目录（cd）
+	----------------------------------------------------------
+	对文件来讲：最高权限是 x 执行权限。
+	对目录来讲：最高权限是 w 写权限。对目录赋予 0 5(rx) 7(rwx) 权限才有意义。
+	----------------------------------------------------------
+	3. 其他权限命令
+	（1）chown 修改文件的所有者  
+	用法： chown 所有者名 文件名
+	实例： chown user1 test.txt
+		   chown root:root test.txt（同时修改所有者和所属组）
+	（2）chgrp 修改文件的所属组
+	用法： chgrp 所属组名 文件名
+	实例： chgrp user1 test.txt
+	----------------------------------------------------------
+	4. 实验：让用户对文件及目录拥有一定的权限，要求：
+	- 拥有一个av目录；
+	- 让加藤老师拥有所有权限；
+	- 让本课程学员有查看的权限；
+	- 其他所有人不许查看这个目录。
+	[root@localhost ~]# mkdir av								#root创建目录av
+	[root@localhost ~]# ll -d av
+	drwxr-xr-x. 2 root root 4096 Mar 31 03:21 av
+	[root@localhost ~]# useradd jt								#添加新用户jt
+	[root@localhost ~]# passwd jt								#为新用户jt设置密码
+	Changing password for user jt.
+	New password: 
+	BAD PASSWORD: it is too simplistic/systematic
+	BAD PASSWORD: is too simple
+	Retype new password: 
+	passwd: all authentication tokens updated successfully.
+	[root@localhost ~]# groupadd user							#添加新所属组user
+	[root@localhost ~]# gpasswd -a cwk user						#将用户cwk添加入user组
+	Adding user cwk to group user
+	[root@localhost ~]# useradd user2 							#添加新用户user2（未设密码）
+	[root@localhost ~]# gpasswd -a user2 user					#将用户user2也添加入user组
+	Adding user user2 to group user
+	[root@localhost ~]# chown jt:user av						#修改av目录的所有者和所属组
+	[root@localhost ~]# ll -d av
+	drwxr-xr-x. 2 jt user 4096 Mar 31 03:21 av
+	[root@localhost ~]# chmod 750 av							#修改权限为750
+	[root@localhost ~]# ll -d av
+	drwxr-x---. 2 jt user 4096 Mar 31 03:21 av
+
+===================================================================================================	
+文件的默认权限
+===================================================================================================	
+	[root@localhost ~]# umask     #查看默认权限
+	0022						  #第一位0表示文件特殊权限；022表示文件默认权限
+	当我们创建目录或文件时（mkdir dirName、touch fileName）就是根据umask计算的默认权限：
+	（1）文件的默认权限：
+		文件默认不能建立为执行文件，必须手动赋予执行权限（安全考虑），所以文件默认权限最大为666
+		默认权限需要换算成字母再相减，即为将666换成rwx再减去umask值换算的rwx。
+		例如：
+		文件默认最大权限666： rw-rw-rw-
+		  	 减去umask值022： ----w--w-
+				  结果为644： rw-r--r--
+		文件默认最大权限666： rw-rw-rw-
+			 减去umask值033： ----wx-wx
+				  结果为644： rw-r--r--
+	（2）目录的默认权限：
+		目录默认权限最大为777
+		默认权限需要换算成字母再相减，即为将777换成rwx再减去umask值换算的rwx。
+		例如：
+		目录默认最大权限777： rwxrwxrwx
+		  	 减去umask值022： ----w--w-
+				  结果为755： rwxr-xr-x
+	----------------------------------------------------------
+	修改umask值：
+	umask 0002       #临时修改
+	vi /etc/profile  #永久修改，改环境变量配置文件
+	
+	
+	
+===================================================================================================	
+ACL权限简介与开启
+===================================================================================================	
+	1. ACL权限简介
+	ACL权限是为了防止权限不够用的情况，一般的权限有所有者、所属组、其他人这三种，当这三种满足不了我们的需求的时候就可以使用ACL权限。
+	比如：一个网络老师，给一个班的学员上课，他在linux的根目录下面建立了一个文件，只允许本班级的学员对该目录进行上传下载，其他人都不行，
+	这时该目录的权限一般是770（一般我们设置权限都是所有者的权限大于所属组的权限，所属组的权限大于其他人的权限，依次往下），
+	此时有个同学想试听我们的课程，该怎么给他分配权限呢？此时的话所属组、所有者、其他人都不满足，这是就用到ACL权限
+	----------------------------------------------------------
+	2. 查看分区ACL权限是否开启
+	[root@localhost ~]# dumpe2fs -h /dev/sda2
+	#dumpe2fs命令是查询指定的分区详细文件系统信息的命令。
+	#选项 -h 仅显示超级块中信息而不是显示磁盘块组的详细信息。
+	----------------------------------------------------------
+	3. 临时开启分区ACL权限
+	[root@localhost ~]# mount -o remount,acl /     
+	#重新挂载根分区，并挂载加入acl权限
+	----------------------------------------------------------
+	4. 永久开启分区ACL权限
+	[root@localhost ~]# vi /etc/fstab
+	#修改加入acl权限: UUID=a1de95cf-8fde-453f-8e29-c72763fe1982 /    \ext4    defaults,acl     1 1
+	[root@localhost ~]# mount -o remount /
+	#重新挂载文件系统或者重启系统，以便使得修改生效
+
+===================================================================================================	
+ACL权限查看与设定
+===================================================================================================	
+	1. 查看ACL权限的命令
+	[root@localhost ~]# getfacl [文件名]
+	----------------------------------------------------------
+	2. 设定ACL权限的命令
+	[root@localhost ~]# setfacl [选项] [文件名]
+	-m  设定ACL权限
+	-x  删除指定的ACL权限
+	-b  删除所有的ACL权限
+	-d  设定默认ACL权限
+	-k  删除默认ACL权限
+	-R  递归设定ACL权限
+	给某用户设定ACL权限，使用“u:用户名:权限”格式：   setfacl -m u:cwk:rx  /home/av	
+	给用户组设定ACL权限，使用“g:用户组名:权限”格式： setfacl -m g:stu:rwx /home/av	
+	----------------------------------------------------------
+	3. 实验：Tony老师有av课程，完全开放给其所有学员而其他人不给使用。现在还要允许他隔壁邻居老王观摩学习。
+	[root@localhost ~]# mkdir av								#root创建目录av
+	[root@localhost ~]# ll -d av
+	drwxr-xr-x. 2 root root 4096 Mar 31 03:21 av
+	[root@localhost ~]# useradd Tony							#添加新用户Tony
+	[root@localhost ~]# groupadd stu							#添加新所属组stu
+	[root@localhost ~]# chown Tony:stu av						#修改av目录的所有者和所属组
+	[root@localhost ~]# ll -d av
+	drwxr-xr-x. 2 Tony stu 4096 Mar 31 03:21 av
+	[root@localhost ~]# chmod 770 av							#修改权限为770
+	[root@localhost ~]# ll -d av
+	drwxrwx---. 2 Tony stu 4096 Mar 31 03:21 av
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# mv av /home								#将av目录移到home下测试，防止lw没权限访问root目录
+	[root@localhost ~]# useradd lw								#添加新用户lw
+	[root@localhost ~]# su - lw									#切换用户为lw
+	[lw@localhost ~]$ cd av										#测试可以发现当前lw没有访问权限，因为他不属于所有者、所属组及其他人中任何身份！
+	-bash: cd: av: Permission denied
+	[lw@localhost ~]$ ls av					
+	ls: cannot open directory av: Permission denied
+	------------------------------------------------------------------------------------------------------
+	[lw@localhost ~]$ su - root									#切换回root用户
+	Password: 
+	[root@localhost ~]# ll /home
+	total 24
+	drwxrwx---. 2 Tony    stu     4096 Mar 31 08:15 av
+	drwx------. 6 lw 	  lw 	  4096 Mar 31 08:34 lw
+	drwx------. 4 Tony    Tony    4096 Mar 31 08:16 Tony
+	[root@localhost ~]# setfacl -m u:lw:rx /home/av				#为lw设定av目录的ACL权限！
+	[root@localhost ~]# ll /home
+	total 28
+	drwxrwx---+ 2 Tony    stu     4096 Mar 31 08:15 av			#注意到权限那里最后点号变成了“+”号！
+	drwx------. 6 lw 	  lw 	  4096 Mar 31 08:34 lw
+	drwx------. 4 Tony    Tony    4096 Mar 31 08:16 Tony
+	[root@localhost ~]# cd /home
+	[root@localhost home]# getfacl av							#获取av目录的ACL权限！
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:lw:r-x													#注意到lw已经具有r-x权限
+	group::rwx
+	mask::rwx
+	other::---
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# su - lw									#切换用户为lw
+	[lw@localhost ~]$ cd ..
+	[lw@localhost home]$ ll
+	total 28
+	drwxrwx---+ 2 Tony    stu     4096 Mar 31 08:15 av
+	drwx------. 6 lw 	  lw 	  4096 Mar 31 08:34 lw
+	drwx------. 4 Tony    Tony    4096 Mar 31 08:16 Tony
+	[lw@localhost home]$ ls av/									#测试看到现在lw已经可以访问av目录了。
+	[lw@localhost home]$ cd av
+	[lw@localhost av]$ 
+
+===================================================================================================	
+ACL最大权限与删除
+===================================================================================================	
+	1. 最大有限权限mask
+	mask是用来指定最大有效权限的。如果给用户赋予了ACL权限，是需要和mask的权限“相与”才能得到用户真正权限。
+	只有都具有权限在相与后还保留，如下，
+		A  	 B 		and
+		r	 r 		r
+		r	 -  	-
+		-	 r  	-
+		-    - 		-
+	修改最大有效权限：
+	[root@localhost ~]# setfacl -m m:rx 文件名					#设定mask权限为r-x。使用“m:权限”格式。
+	实验：
+	[root@localhost home]# setfacl -m u:lw:rwx av				#重新为lw设定av目录的ACL权限为最大rwx
+	[root@localhost home]# getfacl av
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:lw:rwx
+	group::rwx
+	mask::rwx
+	other::---
+	[root@localhost home]# setfacl -m m:rx av					#修改最大有效权限mask为r-x
+	[root@localhost home]# getfacl av
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:lw:rwx			#effective:r-x							#可以看到这时lw权限实际为r-x，因为是与mask权限r-x相与结果！
+	group::rwx			#effective:r-x
+	mask::r-x
+	other::---
+	上面是演示mask作用，实际mask一般是最大权限rwx。
+	----------------------------------------------------------
+	2. 删除ACL权限
+	[root@localhost ~]# setfacl -x u:用户名 文件名				#删除指定用户的ACL权限
+	[root@localhost ~]# setfacl -x g:用户组名 文件名			#删除指定用户组的ACL权限
+	[root@localhost ~]# setfacl -b 文件名					 	#删除文件的所有ACL权限
+	实验：
+	[root@localhost home]# useradd cwk
+	[root@localhost home]# setfacl -m u:cwk:rx av				#新增一个ACL权限
+	[root@localhost home]# getfacl av
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:cwk:r-x												#这里可以看到cwk和lw两个用户						
+	user:lw:rwx
+	group::rwx
+	mask::rwx
+	other::---
+	[root@localhost home]# setfacl -x u:lw av					#删除lw的ACL权限！
+	[root@localhost home]# getfacl av
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:cwk:r-x
+	group::rwx
+	mask::rwx
+	other::---
+	[root@localhost home]# setfacl -b av						#删除av目录所有ACL权限！
+	[root@localhost home]# getfacl av
+	# file: av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	group::rwx
+	other::---
+
+===================================================================================================	
+ACL递归权限与默认权限
+===================================================================================================	
+	1. 递归ACL权限
+	递归ACL权限是父目录在设定ACL权限时，所有的子文件和子目录也会拥有相同的ACL权限。
+	用法：setfacl -m u:用户名:权限 -R 目录名
+	注意：递归权限只能赋予目录，不能赋予文件。
+	实验：
+	[root@localhost home]# setfacl -m u:lw:rx -R av				#为lw对av目录设定递归ACL权限！	
+	[root@localhost home]# ll
+	total 32
+	drwxrwx---+ 2 Tony    stu     4096 Mar 31 17:36 av
+	drwx------. 4 cwk     cwk     4096 Mar 31 02:51 cwk
+	drwx------. 4 lw      lw      4096 Mar 31 17:11 lw
+	[root@localhost home]# cd av
+	[root@localhost av]# ll
+	total 4
+	-rw-r-xr--+ 1 root root 0 Mar 31 17:36 cangls				#这里可以看到权限那里最后点号也变成了“+”号，说明子文件也设置了ACL权限
+	[root@localhost av]# getfacl cangls
+	# file: cangls
+	# owner: root
+	# group: root
+	user::rw-
+	user:lw:r-x													#现在lw对子文件cangls拥有了x执行权限而实际中不应该拥有x权限（是权限溢出，递归时难免出现）！
+	group::r--
+	mask::r-x
+	other::r--
+	----------------------------------------------------------
+	2. 默认ACL权限
+	默认ACL权限的作用是如果给父目录设定了默认ACL权限，那么之后在父目录中再新建子文件都会继承父目录的ACL权限。
+	用法：setfacl -m d:u:用户名:权限 目录名
+	接着实验：
+	[root@localhost av]# touch bols								
+	[root@localhost av]# ll
+	total 4
+	-rw-r--r--. 1 root root 0 Mar 31 17:58 bols					#先测试下新建文件bols，注意它并不具有acl权限
+	-rw-r-xr--+ 1 root root 0 Mar 31 17:36 cangls
+	[root@localhost av]# setfacl -m d:u:lw:rw -R /home/av		#现在为lw对av目录设定默认ACL权限！
+	[root@localhost av]# getfacl /home/av
+	getfacl: Removing leading '/' from absolute path names
+	# file: home/av
+	# owner: Tony
+	# group: stu
+	user::rwx
+	user:lw:r-x
+	group::rwx
+	mask::rwx
+	other::---
+	default:user::rwx											#看到多出几行default
+	default:user:lw:rw-
+	default:group::rwx
+	default:mask::rwx
+	default:other::---
+	[root@localhost av]# touch songls
+	[root@localhost av]# ll
+	total 8
+	-rw-r--r--. 1 root root 0 Mar 31 17:58 bols
+	-rw-r-xr--+ 1 root root 0 Mar 31 17:36 cangls
+	-rw-rw----+ 1 root root 0 Mar 31 17:59 songls				#若再新建文件songls则会看到使用了默认ACL权限！	
+	[root@localhost av]# 
+
+
+===================================================================================================	
+sudo权限
+===================================================================================================	
+	1. sudo权限
+	指的是root把本来只能超级用户执行的命令赋予普通用户执行。
+	sudo的操作对象是系统命令（上面介绍的权限操作的都是文件）
+	----------------------------------------------------------
+	2. sudo使用
+	[root@localhost ~]# visudo	 	#实际修改的是/etc/sudoers文件
+	----------------------------------------------------------
+	root       	ALL=(ALL)       				ALL
+	#用户名	   	被管理主机地址=(可使用的身份)   授权命令（绝对路径）  
+	----------------------------------------------------------
+	# %wheel   	ALL=(ALL)       				ALL
+	#%用户组名	被管理主机地址=(可使用的身份)   授权命令（绝对路径） 
+	----------------------------------------------------------
+	
+	实验1：授权普通用户可以重启服务器。
+	------------------------------------------------------------------------------------------------------
+	[chengwk@localhost ~]$ shutdown -r now						#先以普通用户执行shutdown命令会提示需要root身份
+	shutdown: Need to be root
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# visudo									#以root身份授权，增加一行：chengwk ALL=(ALL) /sbin/shutdown -r now
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# su -l chengwk							#切换成普通用户chengwk
+	[chengwk@localhost ~]$ sudo -l								#运行sudo -l可看到上面授权可执行的命令
+	[sudo] password for chengwk: 
+	Matching Defaults entries for chengwk on this host:
+		!visiblepw, always_set_home, env_reset, env_keep="COLORS DISPLAY HOSTNAME HISTSIZE INPUTRC KDEDIR
+		LS_COLORS", env_keep+="MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE", env_keep+="LC_COLLATE
+		LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES", env_keep+="LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER
+		LC_TELEPHONE", env_keep+="LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY",
+		secure_path=/sbin\:/bin\:/usr/sbin\:/usr/bin
+
+	User chengwk may run the following commands on this host:
+		(ALL) /sbin/shutdown -r now
+	[chengwk@localhost ~]$ sudo /sbin/shutdown -h now			#运行-h关机命令提示不允许执行，因为授权可执行的是-r重启命令
+	[sudo] password for chengwk: 
+	Sorry, user chengwk is not allowed to execute '/sbin/shutdown -h now' as root on localhost.localdomain.
+	[chengwk@localhost ~]$ sudo /sbin/shutdown -r now			#这里若回车将会重启服务器！
+	----------------------------------------------------------
+	注意：root授权命令时和普通用户执行命令时都使用绝对路径，如上面“/sbin/shutdown”，可以用whereis查看命令所在路径。
+	
+	实验2：授权普通用户可以添加其他用户。
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# visudo									#以root身份授权
+	#可添加用户和设置密码：
+	#增加一行：chengwk ALL=/usr/sbin/useradd
+	#增加一行：chengwk ALL=/usr/bin/passwd [A-Za-z]*, !/usr/bin/passwd "", !/usr/bin/passwd root
+	#千万注意：添加密码不能简单写成 chengwk ALL=/usr/bin/passwd 否则权限过大出现能修改root密码等严重问题！！！
+	------------------------------------------------------------------------------------------------------
+	[root@localhost ~]# su -l chengwk							#切换成普通用户chengwk
+	[chengwk@localhost ~]$ sudo -l								#运行sudo -l可看到上面授权可执行的命令
+	Matching Defaults entries for chengwk on this host:
+		!visiblepw, always_set_home, env_reset, env_keep="COLORS DISPLAY HOSTNAME HISTSIZE INPUTRC KDEDIR LS_COLORS", env_keep+="MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE", env_keep+="LC_COLLATE
+		LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES", env_keep+="LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE", env_keep+="LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY",
+		secure_path=/sbin\:/bin\:/usr/sbin\:/usr/bin
+
+	User chengwk may run the following commands on this host:
+		(ALL) /sbin/shutdown -r now
+		(root) /usr/sbin/useradd
+		(root) /usr/bin/passwd [A-Za-z]*, (root) !/usr/bin/passwd \"\", (root) !/usr/bin/passwd root
+	[chengwk@localhost ~]$ sudo /usr/sbin/useradd cangls		#新添加用户cangls并设置密码
+	[chengwk@localhost ~]$ sudo /usr/bin/passwd cangls
+	Changing password for user cangls.
+	New password: 
+	BAD PASSWORD: it is too simplistic/systematic
+	BAD PASSWORD: is too simple
+	Retype new password: 
+	passwd: all authentication tokens updated successfully.
+	[chengwk@localhost ~]$ sudo /usr/bin/passwd root			#继续尝试设置root密码等会提示不允许执行
+	Sorry, user chengwk is not allowed to execute '/usr/bin/passwd root' as root on localhost.localdomain.
+	[chengwk@localhost ~]$ sudo /usr/bin/passwd
+	Sorry, user chengwk is not allowed to execute '/usr/bin/passwd' as root on localhost.localdomain.
+	[chengwk@localhost ~]$ 
+	
+	
+	
+===================================================================================================	
+其他文件特殊权限
+===================================================================================================	
+	SetUID
+	SetGID
+	Sticky BIT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+

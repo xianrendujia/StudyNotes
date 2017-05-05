@@ -1,0 +1,318 @@
+=======================================================================================================
+一、软件包分类
+=======================================================================================================
+	1、源码包
+		打开源码包可以看到里面的文件都是C语言编写的。
+		优点：
+			开源，如果能力足够可以修改源代码；
+			可以自由选择所需功能；
+			软件是编译安装，所以更适合自己系统，更稳定更高效；
+			卸载方便，把安装目录删除就干干净净。
+		缺点：
+			安装过程步骤较多，尤其安装较大的软件集合时容易出错（如LAMP环境搭建等）；
+			编译过程时间较长，安装比二进制安装时间长；
+			因为是编译安装，安装过程中一旦报错新手很难解决。
+	2、二进制包(RPM包|系统默认包)
+		把源码包经过编译翻译成二进制（abcde--->010101）
+		优点：
+			包管理系统简单，只要几个命令就可以实现包的安装、升级、查询和卸载；
+			安装速度比源码包安装快很多。
+		缺点：
+			经过编译，不能再看到源代码；
+			功能选择不如源码包灵活；
+			依赖性。
+	注意：
+	所谓的脚本安装包，其实是把复杂的软件包安装过程写成了程序脚本，让初学者可以执行程序脚本实现一键安装。
+	但是实际安装的还是源码包和二进制包。
+	优点：安装简单快捷。 缺点：完全丧失自定义性。
+	
+=======================================================================================================
+二、 RPM包管理
+=======================================================================================================
+	1、RPM包的来源
+	RPM包在系统光盘中的Packages目录下。
+	如果是虚拟机在CD/DVD那里选择好ISO镜像文件，然后挂载光盘。
+	[root@localhost ~]# mkdir /mnt/cdrom
+	[root@localhost ~]# mount /dev/sr0 /mnt/cdrom
+	mount: block device /dev/sr0 is write-protected, mounting read-only
+	[root@localhost ~]# cd /mnt/cdrom/
+	[root@localhost cdrom]# ls
+	CentOS_BuildTag  isolinux                  RPM-GPG-KEY-CentOS-Debug-6
+	EFI              Packages                  RPM-GPG-KEY-CentOS-Security-6
+	EULA             RELEASE-NOTES-en-US.html  RPM-GPG-KEY-CentOS-Testing-6
+	GPL              repodata                  TRANS.TBL
+	images           RPM-GPG-KEY-CentOS-6
+	[root@localhost cdrom]# ls Packages/
+	yum-presto-0.6.2-1.el6.noarch.rpm
+	yum-utils-1.1.30-30.el6.noarch.rpm
+	zd1211-firmware-1.4-4.el6.noarch.rpm
+	zenity-2.28.0-1.el6.x86_64.rpm
+	zip-3.0-1.el6.x86_64.rpm
+	zlib-1.2.3-29.el6.i686.rpm
+	zlib-1.2.3-29.el6.x86_64.rpm
+	zlib-devel-1.2.3-29.el6.i686.rpm
+	zlib-devel-1.2.3-29.el6.x86_64.rpm
+	zsh-4.3.10-7.el6.x86_64.rpm
+	===========================================================
+	2、RPM包的命名规则
+	httpd-2.2.15-39.el6.centos.x86_64.rpm
+	- httpd软件包名
+	- 2.2.15软件版本
+	- 39软件发布次数
+	- el6.centos适合的Linux平台
+	- x86_64适合的硬件平台
+	- rpm包扩展名
+	===========================================================
+	3、RPM包依赖性
+	树形依赖： a->b->c
+	环形依赖： a->b->c->a
+	模块依赖： 依赖的模块在哪个RPM包里，可以在网站www.rpmfind.net查询
+	===========================================================
+	4、rpm命令管理
+	4.1 包全名和包名
+	包全名：操作还没有安装的软件包时，使用包全名，而且注意路径。
+			如安装和升级用zenity-2.28.0-1.el6.x86_64.rpm。
+	包	名：操作已经安装的软件包时，使用包名，是搜索/var/lib/rpm/中的数据库。
+			如查询和卸载只要用zenity。
+	------------------------------------------------------------
+	4.2	RPM包安装
+	rpm -ivh 包全名
+	选项：
+		-i（install）安装
+		-v（verbose）显示详细信息
+		-h（hash）显示进度
+		--nodeps 不检测依赖性（不要用）
+	如: rpm -ivh httpd-2.2.15-39.el6.centos.x86_64.rpm ，不过这应该会报"Failed dependencies"错误要求先安装其他依赖包。
+	------------------------------------------------
+	4.3 RPM包升级
+	rpm -Uvh 包全名
+	选项： 
+		-U（upgrade）升级
+	如: rpm -Uvh httpd-2.2.15-39.el6.centos.x86_64.rpm ，如果已经安装应该会提示已经安装。
+	------------------------------------------------
+	4.4 RPM包卸载
+	rpm -e 包名
+	选项：
+		-e（erase）卸载
+		--nodeps 不检测依赖性（不要用）
+	如: rpm -e httpd ，不过这里应该也会提示要先卸载其他依赖httpd的软件包。
+	------------------------------------------------
+	4.5 RPM包查询
+	4.5.1 查询RPM包是否安装 
+	rpm -q 包名   #查询包是否安装 -q（query）
+	rpm -qa   	  #查询所有已经安装的RPM包 -a（all）
+	示例：
+	[root@localhost ~]# rpm -q httpd
+	httpd-2.2.15-56.el6.centos.3.x86_64
+	[root@localhost ~]# rpm -q testttt
+	package testttt is not installed
+	[root@localhost ~]# rpm -qa | grep httpd
+	httpd-devel-2.2.15-56.el6.centos.3.x86_64
+	httpd-2.2.15-56.el6.centos.3.x86_64
+	httpd-tools-2.2.15-56.el6.centos.3.x86_64
+	[root@localhost ~]# 
+	4.5.2 查询RPM包详细信息
+	rpm -qi  包名  #查询已安装包信息 -i（information）
+	rpm -qip 包名  #查询未安装包信息 -p（package）
+	示例：	
+	[root@localhost ~]# rpm -qi httpd
+	Name        : httpd                        Relocations: (not relocatable)
+	Version     : 2.2.15                            Vendor: CentOS
+	Release     : 56.el6.centos.3               Build Date: Fri 13 Jan 2017 01:10:24 AM CST
+	Install Date: Wed 15 Mar 2017 04:01:21 PM CST      Build Host: c1bm.rdu2.centos.org
+	Group       : System Environment/Daemons    Source RPM: httpd-2.2.15-56.el6.centos.3.src.rpm
+	Size        : 3137778                          License: ASL 2.0
+	Signature   : RSA/SHA1, Fri 13 Jan 2017 01:28:06 AM CST, Key ID 0946fca2c105b9de
+	Packager    : CentOS BuildSystem <http://bugs.centos.org>
+	URL         : http://httpd.apache.org/
+	Summary     : Apache HTTP Server
+	Description :
+	The Apache HTTP Server is a powerful, efficient, and extensible
+	web server.
+	[root@localhost ~]# 
+	4.5.3 查询RPM包中文件安装位置
+	rpm -ql   包名  #查询已安装包中文件安装位置 -l（list）
+	rpm -qlp  包名  #查询未安装包中文件安装位置 -p（package）
+	示例：
+	[root@localhost ~]# rpm -ql httpd | head -n 10
+	/etc/httpd
+	/etc/httpd/conf
+	/etc/httpd/conf.d
+	/etc/httpd/conf.d/README
+	/etc/httpd/conf.d/welcome.conf
+	/etc/httpd/conf/httpd.conf
+	/etc/httpd/conf/magic
+	/etc/httpd/logs
+	/etc/httpd/modules
+	/etc/httpd/run
+	[root@localhost ~]# 
+	补充：RPM包默认习惯安装位置：
+	/etc/    		 配置文件安装目录
+	/usr/bin/  		 可执行的命令安装目录
+	/usr/lib/  		 程序所使用的函数库保存位置
+	/usr/share/doc/  基本的软件使用手册保存位置
+	/usr/share/man/  帮助文件保存位置
+	4.5.4 查询系统文件属于哪个RPM包
+	rpm -qf  系统文件名  #查询系统文件属于哪个RPM包 -f（file）
+	示例：
+	[root@localhost ~]# cd /etc/
+	[root@localhost etc]# rpm -qf yum.conf
+	yum-3.2.29-75.el6.centos.noarch
+	[root@localhost etc]# rpm -qf testttttttt
+	error: file /etc/testttttttt: No such file or directory
+	[root@localhost etc]# 
+	4.5.5 查询RPM包的依赖性
+	rpm -qR   包名  #查询已安装包的依赖性 -R（requires）
+	rpm -qRp  包名  #查询未安装包的依赖性 -p（package）
+	------------------------------------------------
+	4.6 RPM包校验
+	4.6.1 校验RPM包中的文件是否改变
+	rpm -V 已安装的包名  #校验指定RPM包中的文件 -V（verify）
+	校验结果类似：S.5....T.  c /etc/httpd/conf/httpd.conf
+	头部释义：
+		S 文件大小是否改变
+		M 文件类型或文件权限（rwx）是否改变
+		5 文件MD5校验和是否改变（可看作文件内容是否改变）
+		D 设备的主从代码是否改变
+		L 文件路径是否改变
+		U 文件的所有者是否改变
+		G 文件的所属组是否改变
+		T 文件的修改时间是否改变
+	文件类型：
+		c 配置文件（config file）
+		d 普通文档（documentation）
+		g “鬼”文件（ghost file），很少见，就是该文件不该被改RPM包包含
+		L 授权文件（license file）
+		r 描述文件（read me）
+	示例：
+	[root@localhost etc]# rpm -V httpd
+	S.5....T.  c /etc/httpd/conf/httpd.conf
+	[root@localhost etc]# 
+	4.6.2 RPM包中文件提取
+	rpm2cpio 包全名 | cpio -idv .文件绝对路径
+		- rpm2cpio是将rpm包转换为cpio格式的命令
+		- cpio是一个标准工具，用于创建软件档案文件和从档案文件中提取文件
+	示例：测试将/bin/ls移除然后rpm2cpio从新提取文件。
+	[root@localhost ~]# rpm -qf /bin/ls			#先查询属于哪个RPM包
+	coreutils-8.4-43.el6.x86_64
+	[root@localhost ~]# mv /bin/ls /tmp/
+	[root@localhost ~]# ls
+	-bash: /bin/ls: No such file or directory
+	[root@localhost ~]# rpm2cpio /mnt/cdrom/Packages/coreutils-8.4-37.el6.x86_64.rpm | cpio -idv ./bin/ls	#从光盘RMP包提取文件
+	./bin/ls
+	25234 blocks
+	[root@localhost ~]# ls
+	-bash: /bin/ls: No such file or directory
+	[root@localhost ~]# dir		#用dir可查看到当前多个bin目录，进入将里面的ls文件复制到/bin/目录下，即可恢复使用
+	anaconda-ks.cfg  Desktop    for2.log  install.log	  learnGit  Public     Videos
+	bin		 Documents  for.log   install.log.syslog  Music     software   worlds
+	date.log	 Downloads  for.sh    learngit		  Pictures  Templates
+	[root@localhost ~]# cd bin/
+	[root@localhost bin]# dir
+	ls
+	[root@localhost bin]# pwd
+	/root/bin
+	[root@localhost bin]# mv /root/bin/ls /bin/
+	[root@localhost bin]# ls
+	[root@localhost bin]# ls /
+	bin   dev       etc   lib    lost+found  misc  net  proc  sbin     srv  tmp  var
+	boot  dump.rdb  home  lib64  media       mnt   opt  root  selinux  sys  usr
+	[root@localhost bin]# 
+
+	
+=======================================================================================================
+三、 yum 在线安装
+=======================================================================================================
+	1、yum 源文件
+	vi /etc/yum.repos.d/CentOS-Base.repo
+	[base] 		容器名称，一定要放在[]中
+	name   		容器说明，可以自己随便写
+	mirrorlist	镜像站点，可以注释掉
+	baseurl		yum源服务器地址，默认是CentOS官方源服务器。可以更换其他源。
+	enabled		容器是否生效，若不写或写enabled=1代表生效
+	gpgcheck	指RPM的数字证书是否生效，gpgcheck=1代表生效
+	gpgkey		数字证书的公钥文件保存位置，不用修改
+	示例：
+	[root@localhost ~]# cd /etc/yum.repos.d/
+	[root@localhost yum.repos.d]# ls
+	CentOS-Base.repo       CentOS-fasttrack.repo  CentOS-Vault.repo
+	CentOS-Debuginfo.repo  CentOS-Media.repo
+	[root@localhost yum.repos.d]# cat CentOS-Base.repo 
+	... ...
+	[base]
+	name=CentOS-$releasever - Base
+	mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os&infra=$infra
+	#baseurl=http://mirror.centos.org/centos/$releasever/os/$basearch/
+	gpgcheck=1
+	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+	... ...
+	[root@localhost yum.repos.d]# 
+	===========================================================
+	2、光盘 yum 源搭建
+	（1）挂载光盘（如果是虚拟机在CD/DVD那里选择好ISO镜像文件）
+	[root@localhost ~]# mkdir /mnt/cdrom
+	[root@localhost ~]# mount /dev/sr0 /mnt/cdrom
+	mount: block device /dev/sr0 is write-protected, mounting read-only	
+	（2）使网络yum源失效
+	[root@localhost yum.repos.d]# ls
+	CentOS-Base.repo       CentOS-fasttrack.repo  CentOS-Vault.repo
+	CentOS-Debuginfo.repo  CentOS-Media.repo
+	[root@localhost yum.repos.d]# mv CentOS-Base.repo CentOS-Base.repo.bak  #修改网络yum源后缀名使其失效
+	（3）启用光盘yum源
+	[root@localhost yum.repos.d]# vim CentOS-Media.repo 
+	[c6-media]
+	name=CentOS-$releasever - Media
+	baseurl=file:///mnt/cdrom			#这里改成你自己的光盘挂载点
+	#		file:///media/cdrom/		#注释掉这两个不存在的地址
+	#		file:///media/cdrecorder/
+	gpgcheck=1
+	enabled=1							#把enabled=0改成enabled=1让其生效
+	gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+	修改后保存退出，然后执行 yum list 查看软件包，应该可以看到yum源名刚好就是c6-media，代表光盘yum源已生效。
+	===========================================================
+	3、常用yum命令
+	3.1 查询
+	yum list  				#查询所有可用的软件包列表
+	yum search 关键字		#搜索服务器上所有和关键字相关的软件包
+	如: yum search httpd
+	3.2 安装
+	yum -y install 包名		#install 安装，-y 自动回答yes
+	如: yum	-y install gcc
+	3.3 升级	
+	yum -y update 包名		#update 升级，-y 自动回答yes
+	3.4 卸载	
+	yum -y remove 包名		#remove 卸载，-y 自动回答yes
+	注意：推荐服务器使用最小化安装，用什么软件安装什么，尽量不卸载，否则新手可能造成失误。
+	===========================================================
+	4、yum软件组管理命令
+	yum grouplist   			#列出所有可用的软件组
+	yum groupinstall 软件组名  	#安装指定的软件组
+	yum groupremove  软件组名 	#卸载指定的软件组
+	注：可以先执行 LANG=zh_CN.utf8 或 LANG=en_US 临时切换中英文显示软件组名。
+	比如安装中文支持组: yum groupinstall "Chinese Support"
+	示例：
+	[root@localhost yum.repos.d]# yum grouplist
+	Loaded plugins: fastestmirror, refresh-packagekit, security
+	Setting up Group Process
+	Loading mirror speeds from cached hostfile
+	 * base: mirrors.cn99.com
+	 * extras: mirrors.cn99.com
+	 * updates: mirrors.cn99.com
+	Installed Groups:
+	   Additional Development
+	   Base
+	   Compatibility libraries
+	   Debugging Tools
+	   Desktop
+	   Desktop Debugging and Performance Tools
+	   Desktop Platform
+	   Dial-up Networking Support
+	   Directory Client
+	   ... ...
+	
+=======================================================================================================
+三、 源码包安装
+=======================================================================================================
+
+	
+	
