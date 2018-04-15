@@ -1,265 +1,265 @@
 ===================================================================================================
-һ���ļ�Ŀ¼��������
+一、文件目录处理命令
 ===================================================================================================
-	1. ����Ŀ¼ mkdir  (make directory)
-	�÷��� mkdir [-p] [Ŀ¼]
-	����ѡ��-p��ʾ�ݹ鴴��Ŀ¼���磺mkdir -p japan/cangls
+	1. 建立目录 mkdir  (make directory)
+	用法： mkdir [-p] [目录]
+	加上选项-p表示递归创建目录，如：mkdir -p japan/cangls
 	----------------------------------------------------------
-	2. �л�Ŀ¼ cd  (change directory)
-	�÷��� cd [Ŀ¼]
-	cd ~ ���� cd ���뵱ǰ�û���Ŀ¼
-	cd -  �����ϴ�Ŀ¼
-	cd .. �����ϼ�Ŀ¼
-	ע�����·�������յ�ǰĿ¼���ң��;���·�����Ӹ�Ŀ¼/��ʼ���ң�
-	���� pwd ����ɲ鿴��ǰ����Ŀ¼�� 
-	�� tab �����Զ���ȫ·����
+	2. 切换目录 cd  (change directory)
+	用法： cd [目录]
+	cd ~ 或者 cd 进入当前用户家目录
+	cd -  进入上次目录
+	cd .. 进入上级目录
+	注意相对路径（参照当前目录查找）和绝对路径（从跟目录/开始查找）
+	输入 pwd 命令可查看当前所在目录。 
+	按 tab 键可自动补全路径。
 	----------------------------------------------------------
-	3. ɾ����Ŀ¼ rmdir (remove empty directory)
-	�÷��� rmdir [Ŀ¼��]
-	����rmdirֻ��ɾ����Ŀ¼��ʵ���õĽ��١�
+	3. 删除空目录 rmdir (remove empty directory)
+	用法： rmdir [目录名]
+	但是rmdir只能删除空目录，实际用的较少。
 	----------------------------------------------------------
-	4. ɾ���ļ���Ŀ¼ rm
-	�÷��� rm [-irf] [�ļ���Ŀ¼]
-	-i ɾ��ǰ��һѯ��ȷ�ϡ�
-	-f ��ʹԭ����������ΪΨ������ֱ��ɾ����������һȷ�ϡ�
-	-r ɾ��Ŀ¼����Ŀ¼������֮��������һɾ����
-	rm cangls     #ɾ���ļ�����ȷ���Ƿ�ɾ��
-	rm -r  japan  #ɾ��Ŀ¼��-r����ȷ���Ƿ�ɾ��
-	rm -rf japan  #����ȷ��ǿ��ɾ���ļ���Ŀ¼����÷�
+	4. 删除文件或目录 rm
+	用法： rm [-irf] [文件或目录]
+	-i 删除前逐一询问确认。
+	-f 即使原档案属性设为唯读，亦直接删除，无需逐一确认。
+	-r 删除目录，将目录及以下之档案亦逐一删除。
+	rm cangls     #删除文件，会确认是否删除
+	rm -r  japan  #删除目录加-r，会确认是否删除
+	rm -rf japan  #不用确认强制删除文件或目录，最常用法
 	----------------------------------------------------------
-	5. �����ļ���Ŀ¼ cp (copy)
-	�÷��� rm [-rpda] [Դ�ļ���Ŀ¼] [Ŀ��Ŀ¼]
-	-r ����Ŀ¼
-	-p �����ļ����Ը���
-	-d ��Դ�ļ��������ļ�������������
-	-a �൱�� -pdr
-	cp    cangls /tmp/	#�����ļ�
-	cp -r japan/ /tmp/	#����Ŀ¼��-r	
-	cp -a cangls /tmp/	#��-a���ƺ���ȫ��ͬ
+	5. 复制文件或目录 cp (copy)
+	用法： cp [-rpda] [源文件或目录] [目标目录]
+	-r 复制目录
+	-p 连带文件属性复制
+	-d 若源文件是链接文件则复制链接属性
+	-a 相当于 -pdr
+	cp    cangls /tmp/	#复制文件
+	cp -r japan/ /tmp/	#复制目录加-r	
+	cp -a cangls /tmp/	#加-a复制后完全相同
 	----------------------------------------------------------
-	6. �ƶ����������ļ���Ŀ¼ mv (move)
-	�÷��� rm [Դ�ļ���Ŀ¼] [Ŀ��Ŀ¼]
-	ע�⣬��rm��cp��ͬ��mv����Ŀ¼ʱ���ü�-rѡ�
-	mv cangls /tmp/	#�ƶ�
-	mv cangls bols	#������	
+	6. 移动或重命名文件或目录 mv (move)
+	用法： mv [源文件或目录] [目标目录]
+	注意，与rm和cp不同，mv操作目录时不用加-r选项。
+	mv cangls /tmp/	#移动
+	mv cangls bols	#重命名	
 	----------------------------------------------------------
-	7. �������� ln (link)
-	ln��������Ϊĳһ���ļ�������һ��λ�ý���һ��ͬ�������ӡ�
-	��������Ҫ�ڲ�ͬ��Ŀ¼�õ���ͬ���ļ�ʱ�����ǲ���Ҫ��ÿһ��Ŀ¼�¶���һ���ļ���
-	ֻҪ��ĳ���̶���Ŀ¼���ϸ��ļ���Ȼ����������Ŀ¼����ln�������ӣ�link�����Ϳ��ԣ������ظ���ռ�ô��̿ռ䡣
-	�÷��� ln [-s] [Դ�ļ���Ŀ¼] [Ŀ���ļ���Ŀ¼] 
-	-s ������
-	Ӳ����(hard link)������
-		ӵ����ͬ��i�ڵ�ʹ洢block�飬���Կ�����ͬһ���ļ���
-		��ͨ��i�ڵ�ʶ��i�ڵ�����ͬ�ģ�
-		���ܿ��������Ҳ���ܶ�Ŀ¼������
-		ɾ��Դ�ļ���Ӳ���ӻ��ܼ���ʹ�á�
-	������(symbolic link)������
-		������Windows����ϵͳ�еĿ�ݷ�ʽ��
-		������ӵ���Լ���i�ڵ��block�飬�������ݿ���ֻ����ԭ�ļ�����i�ڵ�ţ���û��ʵ�ʵ��ļ����ݣ�
-		�������ļ�����lrwxwrxrwx��
-		���Կ��������Ҳ���Զ�Ŀ¼������
-		ɾ��Դ�ļ��������Ӳ�����ʹ�ã���װ��ֲ�����˸����
-	ע��Ӳ���ӡ������ӡ�Դ�ļ����ߣ��޸���һ�ļ���������Ҳ����֮�ı䡣
+	7. 链接命令 ln (link)
+	ln命令是是为某一个文件在另外一个位置建立一个同步的链接。
+	当我们需要在不同的目录用到相同的文件时，我们不需要在每一个目录下都放一个文件，
+	只要在某个固定的目录放上该文件，然后在其它的目录下用ln命令链接（link）它就可以，不必重复的占用磁盘空间。
+	用法： ln [-s] [源文件或目录] [目标文件或目录] 
+	-s 软链接
+	硬链接(hard link)特征：
+		拥有相同的i节点和存储block块，可以看作是同一个文件；
+		可通过i节点识别，i节点是相同的；
+		不能跨分区创建也不能对目录创建；
+		删除源文件，硬链接还能继续使用。
+	软链接(symbolic link)特征：
+		类似于Windows操作系统中的快捷方式；
+		软链接拥有自己的i节点和block块，但是数据块中只保存原文件名和i节点号，并没有实际的文件数据；
+		软链接文件都是lrwxwrxrwx；
+		可以跨分区创建也可以对目录创建；
+		删除源文件，软链接不能再使用（红底白字不断闪烁）。
+	注意硬链接、软链接、源文件三者，修改任一文件，其他的也都随之改变。
 	
 ===================================================================================================
-�����ļ���������
+二、文件搜索命令
 ===================================================================================================
-	1.�ļ����������� locate
-	�÷���locate [�ļ���]��ֻ�������ļ���
-	ע�⣺locate���ں�̨���ݿ� /var/lib/mlocate/mlocate.db ������������ֱ����ϵͳ���а��ļ���������
-	ִ�� updatedb ����ǿ�Ƹ��¸ú�̨���ݿ⣬��Ĭ��һ��һ���£����Ըո��½����ļ�����locate����������
-	locate�����ٶȿ죬����ֻ�������ļ�����
-	���������ļ� /var/lib/updatedb.conf �������˲�����������
+	1.文件的搜索命令 locate
+	用法：locate [文件名]，只能搜索文件名
+	注意：locate是在后台数据库 /var/lib/mlocate/mlocate.db 搜索，并不是直接在系统当中按文件名搜索；
+	执行 updatedb 命令强制更新该后台数据库，它默认一天一更新，所以刚刚新建的文件可能locate搜索不到；
+	locate搜索速度快，但是只能搜索文件名；
+	搜索配置文件 /var/lib/updatedb.conf 中限制了部分搜索规则。
 	----------------------------------------------------------
-	2.������������� whereis �� which
-	�÷��� whereis [������]��������������·���Ͱ����ĵ���λ��
-	ѡ� whereis -b ls ֻ��ʾ����·����whereis -m ls ֻ��ʾ�����ĵ�·����
-	�÷��� which [������]��������������·��������������� which ls��
-	ֻ��������������������ļ������ǲ�����������ɲ飬�� whereis cd �ᱨ�Ҳ�������Ϊcd��shell�ڲ��Դ����
-	ִ�� echo $PATH ���Բ鿴��ϵͳ��������������windowsϵͳ������/usr/bin/ls ֱ��ʹ�� ls��
+	2.命令的搜索命令 whereis 和 which
+	用法： whereis [命令名]，搜索命令所在路径和帮助文档的位置
+	选项： whereis -b ls 只显示命令路径，whereis -m ls 只显示帮助文档路径；
+	用法： which [命令名]，搜索命令所在路径和命令别名，如 which ls。
+	只能搜索命令而不能搜索文件，但是不是所有命令都可查，如 whereis cd 会报找不到，因为cd是shell内部自带命令。
+	执行 echo $PATH 可以查看到系统环境变量，类似windows系统，所以/usr/bin/ls 直接使用 ls。
 	----------------------------------------------------------
-	3.�ļ����������� find
-	�÷��� find [������Χ] [��������]
-	����rootĿ¼�°��ļ��������ļ� find /root -name install.log
-	ע�⣺�����Χ�����������ǳ�����ϵͳ��Դ���ٶȿ��ܺ�����
-	find �������ļ�������ȫƥ��ģ�������ʹ��ͨ���: * �� []�����������������ļ������� find /root -name "install.log*"��
-	find �кܶ�ѡ����ã��磺 
-	find /root -mtime +10 ����10��ǰ�޸ĵ��ļ���ע�� +10 ��ʾ10����ǰ��10 ��ʾ10�쵱�죬-10 ��ʾ10�����ڣ����ƻ��� -ctime �� -atime��
-	find /root -size +20k �����ļ���С����20KB���ļ���ע�� +20k ��ʾ����20KB��20k ��ʾ�պõ���20KB��-20k ��ʾС��20KB��ע�ⵥλkҪСд����MʱҪ��д��
-	�ٿ�Щ���Ӳ���
-	find /root -size +20k -a -size -50k �����ļ��ļ���С����20K����С��50KB���ļ���ע�� -a and �߼��룬-o or �߼���
-	find /root -size +20k -a -size -50k -exec ls -lh {} \; �����ļ��ļ���С����20K����С��50KB���ļ�����ʾ����ϸ��Ϣ��
-	-exec �������������command���������ֹ����;Ϊ������־�ģ���������������ķֺ��ǲ���ȱ�ٵģ����ǵ�����ϵͳ�зֺŻ��в�ͬ�����壬����ǰ��ӷ�б�ܡ�
-	{} �����Ŵ���ǰ��find���ҳ������ļ�����
+	3.文件的搜索命令 find
+	用法： find [搜索范围] [搜索条件]
+	如在root目录下按文件名搜索文件 find /root -name install.log
+	注意：避免大范围搜索，否则会非常消耗系统资源，速度可能很慢；
+	find 搜索的文件名是完全匹配的，但可以使用通配符: * ？ []搜索，用引号括起文件名，如 find /root -name "install.log*"。
+	find 有很多选项可用，如： 
+	find /root -mtime +10 查找10天前修改的文件，注意 +10 表示10天以前，10 表示10天当天，-10 表示10天以内，类似还有 -ctime 和 -atime；
+	find /root -size +20k 查找文件大小大于20KB的文件，注意 +20k 表示大于20KB，20k 表示刚好等于20KB，-20k 表示小于20KB，注意单位k要小写而是M时要大写。
+	再看些复杂操作
+	find /root -size +20k -a -size -50k 查找文件文件大小大于20K并且小于50KB的文件。注意 -a and 逻辑与，-o or 逻辑或。
+	find /root -size +20k -a -size -50k -exec ls -lh {} \; 查找文件文件大小大于20K并且小于50KB的文件并显示出详细信息。
+	-exec 参数后面跟的是command命令，它的终止是以;为结束标志的，所以这句命令后面的分号是不可缺少的，考虑到各个系统中分号会有不同的意义，所以前面加反斜杠。
+	{} 花括号代表前面find查找出来的文件名。
 	----------------------------------------------------------
-	4.�ַ������������� grep
-	�÷��� grep [ѡ��] [�ַ���] [�ļ���]�����ļ�������ƥ���������ַ������� grep "size" anaconda-ks.cfg 
-	ѡ� -i ���Դ�Сд�� -v �ų�ָ���ַ�����ȡ������
-	ע��: grep �� find ������
-	find: ��ϵͳ�������������������ļ���������ȫƥ�䣬������ʹ��ͨ���* �� []����ƥ�䣻
-	grep�����ļ��������������������ַ������ǰ���ƥ�䡣
+	4.字符串的搜索命令 grep
+	用法： grep [选项] [字符串] [文件名]，在文件中搜索匹配条件的字符串，如 grep "size" anaconda-ks.cfg 
+	选项： -i 忽略大小写， -v 排除指定字符串是取反操作
+	注意: grep 与 find 的区别：
+	find: 在系统当中搜索符合条件的文件名，是完全匹配，还可以使用通配符* ？ []进行匹配；
+	grep：在文件当中搜索符合条件的字符串，是包含匹配。
 	
 ===================================================================================================
-����ѹ�����ѹ������
+三、压缩与解压缩命令
 ===================================================================================================
-	����ѹ����ʽ��  .zip  .gz  .bz2
-	���ѹ����ʽ��.tar.gz  .tar.bz2
+	常用压缩格式：  .zip  .gz  .bz2
+	最常用压缩格式：.tar.gz  .tar.bz2
 	----------------------------------------------------------
-	1. .zip ��ʽ
-	zip    ѹ���ļ��� Դ�ļ�   #zip cangls.zip cangls
-	zip -r ѹ���ļ��� ԴĿ¼   #zip -r japan.zip japan��һ��Ҫ��-r����ѹ����ʧ���ļ���
-	��ѹ��: unzip ѹ���ļ�     #unzip japan.zip
+	1. .zip 格式
+	zip    压缩文件名 源文件   #zip cangls.zip cangls
+	zip -r 压缩文件名 源目录   #zip -r japan.zip japan（一定要加-r否则压缩后丢失子文件）
+	解压缩: unzip 压缩文件     #unzip japan.zip
 	----------------------------------------------------------
-	2. .gz ��ʽ
-	gzip    Դ�ļ�   		   #ѹ��Ϊ.gz��ʽ��Դ�ļ�����ʧ���� gzip cnagls 
-	gzip -c Դ�ļ� > ѹ���ļ�  #ѹ��Ϊ.gz��ʽ��Դ�ļ��������� gzip -c cnagls > cangls.gz
-	gzip -r ԴĿ¼ 			   #ע��ѹ����ֻ�Ǹ�Ŀ¼�µ������ļ�����������������ѹ������Ŀ¼����
-	��ѹ��: gzip -d ѹ���ļ�  ����	gunzip  ѹ���ļ�
-	��ѹ��Ŀ¼ʱ��Ҫ��-rѡ� gzip -dr ѹ��Ŀ¼  ����	gunzip  -r ѹ��Ŀ¼
+	2. .gz 格式
+	gzip    源文件   		   #压缩为.gz格式，源文件会消失。如 gzip cnagls 
+	gzip -c 源文件 > 压缩文件  #压缩为.gz格式，源文件保留。如 gzip -c cnagls > cangls.gz
+	gzip -r 源目录 			   #注意压缩的只是该目录下的所有文件（含各级）而不能压缩整个目录本身
+	解压缩: gzip -d 压缩文件  或者	gunzip  压缩文件
+	解压缩目录时需要加-r选项： gzip -dr 压缩目录  或者	gunzip  -r 压缩目录
 	----------------------------------------------------------
-	3. .bz2 ��ʽ
-	bzip2    Դ�ļ�    #ѹ��Ϊ.bz2��ʽ��������Դ�ļ����� bzip2 cnagls 
-	bzip2 -k Դ�ļ�    #ѹ��Ϊ.bz2��ʽ������Դ�ļ���
-	ע�⣺bzip2�����ѹ��Ŀ¼��
-	��ѹ��: bzip2 -d ѹ���ļ�  ����	bunzip2  ѹ���ļ�  ����ѹ��ʱ��-k�ܱ���Դ�ļ���
+	3. .bz2 格式
+	bzip2    源文件    #压缩为.bz2格式，不保留源文件。如 bzip2 cnagls 
+	bzip2 -k 源文件    #压缩为.bz2格式，保留源文件。
+	注意：bzip2命令不能压缩目录。
+	解压缩: bzip2 -d 压缩文件  或者	bunzip2  压缩文件  （解压缩时加-k能保留源文件）
 	----------------------------------------------------------
-	ע�⣺����3��ѹ����ʽ��ֻ��.zip��������ѹ���ͽ�ѹ��Ŀ¼������Linux���ṩ��tar���Ȼ����ѹ���Ĳ��������£�
-	����ʶ����ͽ�������tar�� 
-	tar -cvf ����ļ��� Դ�ļ���ѡ� -c���  -v��ʾ����  -fָ���������ļ���	
-	tar -xvf ����ļ�����ѡ� -x����
-	ʾ�������ѹ����
-	tar -cvf japan.tar japan  #��japanĿ¼�����japan.tar
-	gzip japan.tar			  #������ɵ�japan.tarѹ����japan.tar.gz
-	ʾ����ѹ����
-	gzip -d japan.tar.gz      #��ѹ���ɵ�japan.tar.gz��ѹ��Ϊjapan.tar
-	tar -xvf japan.tar		  #��japan.tar����Ϊjapan
+	注意：上述3种压缩方式，只有.zip才能正常压缩和解压缩目录。所以Linux还提供先tar打包然后再压缩的操作，如下：
+	先认识打包和解打包命令tar： 
+	tar -cvf 打包文件名 源文件，选项： -c打包  -v显示过程  -f指定打包后的文件名	
+	tar -xvf 打包文件名，选项： -x解打包
+	示例打包再压缩：
+	tar -cvf japan.tar japan  #将japan目录打包成japan.tar
+	gzip japan.tar			  #将打包成的japan.tar压缩成japan.tar.gz
+	示例解压缩：
+	gzip -d japan.tar.gz      #将压缩成的japan.tar.gz解压缩为japan.tar
+	tar -xvf japan.tar		  #将japan.tar解打包为japan
 	----------------------------------------------------------
-	4. .tar.gz ��ʽ
-	tar -zcvf ѹ������.tar.gz Դ�ļ�  	#ѹ��Ϊ.tar.gz��ʽ
-	tar -zxvf ѹ������.tar.gz			#��ѹ��
+	4. .tar.gz 格式
+	tar -zcvf 压缩包名.tar.gz 源文件  	#压缩为.tar.gz格式
+	tar -zxvf 压缩包名.tar.gz			#解压缩
 	----------------------------------------------------------
-	5. .tar.bz2 ��ʽ
-	tar -jcvf ѹ������.tar.bz2 Դ�ļ�   #ѹ��Ϊ.tar.bz2��ʽ
-	tar -jxvf ѹ������.tar.bz2			#��ѹ��	
+	5. .tar.bz2 格式
+	tar -jcvf 压缩包名.tar.bz2 源文件   #压缩为.tar.bz2格式
+	tar -jxvf 压缩包名.tar.bz2			#解压缩	
 	----------------------------------------------------------
-	���䣺
-	��Ҫѹ������ļ����ÿո�����ļ��� tar -zcvf test.tar.gz japan readme.txt
-	��Ҫָ��ѹ��λ�ã�ѹ����ǰ��·���� tar -zcvf /tmp/test.tar.gz japan readme.txt
-	��Ҫָ����ѹ��λ�ã������-C ·����tar -zxvf japan.tar.gz -C /tmp/
-	��ֻ�ǲ鿴ѹ�������ݣ���-tѡ�   tar -ztvf test.tar.gz
+	补充：
+	若要压缩多个文件，用空格隔开文件： tar -zcvf test.tar.gz japan readme.txt
+	若要指定压缩位置，压缩包前加路径： tar -zcvf /tmp/test.tar.gz japan readme.txt
+	若要指定解压缩位置，后面加-C 路径：tar -zxvf japan.tar.gz -C /tmp/
+	若只是查看压缩包内容，用-t选项：   tar -ztvf test.tar.gz
 	
 ===================================================================================================
-�ġ������ĵ�����
+四、帮助文档命令
 ===================================================================================================
-	1. man �����ȡ����İ����ĵ���
-	man man ���Կ�����1-8��������ĵ���
-	���ĵ�������/�ַ����������ַ�������n��һ������shift+n��һ������q�˳��ĵ���
-	man -f ��������൱�� whatis ������Բ鿴���������ļ�������İ����ĵ����� man -f passwd��
-	man -k ��������൱�� apropos ������Բ鿴�����а�������ؼ��ֵİ����ĵ��� 
-	man 5 passwd ֻ�鿴passwd��5����İ����ĵ���
+	1. man 命令，获取命令的帮助文档。
+	man man 可以看到有1-8个级别的文档。
+	在文档里输入/字符串可搜索字符串，按n下一个，按shift+n上一个；按q退出文档。
+	man -f 命令，功能相当于 whatis 命令，可以查看到命令有哪几个级别的帮助文档。如 man -f passwd。
+	man -k 命令，功能相当于 apropos 命令，可以查看到所有包含命令关键字的帮助文档。 
+	man 5 passwd 只查看passwd的5级别的帮助文档。
 	----------------------------------------------------------
-	2. ���� --help��ֻ��ʾ�����ѡ���÷���
-	�磺ls --help
+	2. 命令 --help，只显示命令的选项用法。
+	如：ls --help
 	----------------------------------------------------------
-	3. help ���ֻ��ȡshell�ڲ��Դ����������
-	�磺help cd
-	�ж��Ƿ�shell�ڲ��Դ�����Ҳ���ִ���ļ����ǣ��磺 whereis cd
+	3. help 命令，只获取shell内部自带命令帮助。
+	如：help cd
+	判断是否shell内部自带命令，找不到执行文件就是，如： whereis cd
 	----------------------------------------------------------
-	4. info ����г�������ϸ��Ϣ��
-	���س��������*��ǵ��Ӱ���ҳ�棬��u�����ϲ�ҳ�棬��p��n���·�ҳ����q�˳�������
+	4. info 命令，列出命令详细信息。
+	按回车进入带有*标记的子帮助页面，按u返回上层页面，按p和n上下翻页，按q退出帮助。
 	
 ===================================================================================================
-�塢�ػ�����������
+五、关机与重启命令
 ===================================================================================================
-	1. shutdown [ѡ��] [ʱ��]
-	ѡ� -c ȡ��ǰһ���ػ���� -h �ػ��� -r ������
-	shutdown -r now       #������������������������
-	shutdown -r 05:30     #����05:30���������������Ǵ�����ִ�к���潫���ܼ��������κβ��� 
-	shutdown -r 05:30 &   #����05:30��������������&����ʾ�����ִ̨�У����滹�ܼ����������� 
-	shutdown -c			  #ȡ��ǰ������
+	1. shutdown [选项] [时间]
+	选项： -c 取消前一个关机命令； -h 关机； -r 重启。
+	shutdown -r now       #将立即重启服务器，很少用
+	shutdown -r 05:30     #将在05:30重启服务器，但是此命令执行后界面将不能继续其他任何操作 
+	shutdown -r 05:30 &   #将在05:30重启服务器，加&符表示放入后台执行，界面还能继续其他操作 
+	shutdown -c			  #取消前面设置
 	----------------------------------------------------------
-	2. �����ػ�����
+	2. 其他关机命令
 	[root@localhost ~]# halt
 	[root@localhost ~]# poweroff
 	[root@localhost ~]# init 0
-	ע�⣺��Щֻ���˽��£���̫��ȫ���ػ�ǰ���ܲ��ᱣ�����ݡ�
+	注意：这些只用了解下，不太安全，关机前可能不会保存数据。
 	----------------------------------------------------------
-	3. �����������
+	3. 其他重启命令：
 	[root@localhost ~]# reboot	
 	[root@localhost ~]# init 6
 	----------------------------------------------------------
-	4. ϵͳ���м���
-		0 	�ػ�
-		1 	���û�
-		2 	����ȫ���û�������NFS����
-		3 	��ȫ���û�
-		4 	δ����
-		5 	ͼ�ν���
-		6 	����
-	��ѯ��ǰϵͳ���м���
+	4. 系统运行级别：
+		0 	关机
+		1 	单用户
+		2 	不完全多用户，不含NFS服务
+		3 	完全多用户
+		4 	未分配
+		5 	图形界面
+		6 	重启
+	查询当前系统运行级别：
 	[root@localhost ~]# runlevel   
 	N 5
-	�鿴��ǰϵͳĬ�����м���
+	查看当前系统默认运行级别：
 	[root@localhost ~]# cat /etc/inittab
-	#�޸� id:5:initdefault:
+	#修改 id:5:initdefault:
 	----------------------------------------------------------
-	5. ��ȷ�˳���½:
+	5. 正确退出登陆:
 	[root@localhost ~]# logout
 	
 ===================================================================================================
-������������
+六、挂载命令
 ===================================================================================================
-	1. �鿴���Զ�����
-	[root@localhost ~]# mount			#��ѯϵͳ���Ѿ����ص��豸
-	[root@localhost ~]# mount -a		#���������ļ�/etc/fstab�������Զ�����
+	1. 查看与自动挂载
+	[root@localhost ~]# mount			#查询系统中已经挂载的设备
+	[root@localhost ~]# mount -a		#依据配置文件/etc/fstab的内容自动挂载
 	----------------------------------------------------------
-	2. ���������ʽ
-	[root@localhost ~]# mount [-t �ļ�ϵͳ] [-o ����ѡ��] �豸�ļ��� ���ص�
-	-t �ļ�ϵͳ�������ļ�ϵͳ������ָ�����ص����ͣ�����ext3��ext4��iso9660���ļ�ϵͳ
-	-o ����ѡ�����ָ�����صĶ���ѡ���exec/noexec��rw/ro�ȵ�
+	2. 挂载命令格式
+	[root@localhost ~]# mount [-t 文件系统] [-o 特殊选项] 设备文件名 挂载点
+	-t 文件系统：加入文件系统类型来指定挂载的类型，可以ext3、ext4、iso9660等文件系统
+	-o 特殊选项：可以指定挂载的额外选项，如exec/noexec、rw/ro等等
 	----------------------------------------------------------
-	linux�����൱��windows��Ҫ�����̷���windows�Զ�ʶ���linux��Ҫ��Ϊ�ֹ����ء�
-	����ԭ����ͬ��linux���潫u���ֶ�����ΪĿ¼�����Ŀ¼�������ص㡣
+	linux挂载相当于windows需要分配盘符。windows自动识别而linux需要人为手工挂载。
+	基本原理相同，linux里面将u盘手动挂载为目录，这个目录叫做挂载点。
 	----------------------------------------------------------
-	3. ���ع���
-	����Ҫ������̣������������͵������ͼ�����ã�Ȼ��ѡ��һ��ISO�����ļ���
-	[root@localhost ~]# mkdir /mnt/cdrom/  						#�������ص�
-	[root@localhost ~]# mount -t iso9660 /dev/sr0 /mnt/cdrom/ 	#���ع��̣������豸�ļ��� /dev/sr0 ����������������/dev/cdrom��
-	[root@localhost ~]# mount /dev/sr0 /mnt/cdrom/   			#����ֱ��д���㣬��ΪϵͳĬ�Ϲ��̵�ϵͳ�ļ����;��� iso9660
+	3. 挂载光盘
+	首先要放入光盘，如果是虚拟机就点击光盘图标设置，然后选择一个ISO镜像文件。
+	[root@localhost ~]# mkdir /mnt/cdrom/  						#建立挂载点
+	[root@localhost ~]# mount -t iso9660 /dev/sr0 /mnt/cdrom/ 	#挂载光盘，光盘设备文件名 /dev/sr0 （或者用其软链接/dev/cdrom）
+	[root@localhost ~]# mount /dev/sr0 /mnt/cdrom/   			#或者直接写简洁点，因为系统默认光盘的系统文件类型就是 iso9660
 	mount: block device /dev/sr0 is write-protected, mounting read-only
-	[root@localhost ~]# ls /mnt/cdrom/							#���Բ鿴����������
+	[root@localhost ~]# ls /mnt/cdrom/							#可以查看到光盘内容
 	CentOS_BuildTag  GPL       Packages                  RPM-GPG-KEY-CentOS-6           RPM-GPG-KEY-CentOS-Testing-6
 	EFI              images    RELEASE-NOTES-en-US.html  RPM-GPG-KEY-CentOS-Debug-6     TRANS.TBL
 	EULA             isolinux  repodata                  RPM-GPG-KEY-CentOS-Security-6
 	----------------------------------------------------------
-	4. ж������
-	[root@localhost ~]# umount �豸�ļ������߹��ص�
-	[root@localhost ~]# umount /mnt/cdrom/						#ж�ع���	
+	4. 卸载命令
+	[root@localhost ~]# umount 设备文件名或者挂载点
+	[root@localhost ~]# umount /mnt/cdrom/						#卸载光盘	
 	[root@localhost ~]# ls /mnt/cdrom/
 	[root@localhost ~]# 
 	----------------------------------------------------------
-	5. ����U��
-	����ȷ��U���豸�ļ���һ����sdb1��������ִ�� fdisk -l �鿴ϵͳʶ���Ӳ�̡� 							
-	[root@localhost ~]# mount -t vfat /dev/sdb1 /mnt/usb/  		#vfatָ����fat32�ļ�ϵͳ��
-	ע�⣺LinuxĬ�ϲ�֧��NTFS�ļ�ϵͳ�ġ�
+	5. 挂载U盘
+	首先确定U盘设备文件（一般是sdb1），可以执行 fdisk -l 查看系统识别的硬盘。 							
+	[root@localhost ~]# mount -t vfat /dev/sdb1 /mnt/usb/  		#vfat指的是fat32文件系统。
+	注意：Linux默认不支持NTFS文件系统的。
 
 ===================================================================================================
-�ߡ��鿴�û���½����
+七、查看用户登陆命令
 ===================================================================================================
-	1. w���鿴��½�û���Ϣ������������û��� ��½�ն� ��½��Դip ��½ʱ�� IDLE�û�����ʱ�� JCPU���н���ռ��ʱ��  PCPU��ǰ����ռ��ʱ�� WHAT��ǰ���������
+	1. w，查看登陆用户信息。命令输出：用户名 登陆终端 登陆来源ip 登陆时间 IDLE用户闲置时间 JCPU所有进程占用时间  PCPU当前进程占用时间 WHAT当前在运行命令。
 	[root@localhost ~]# w
 	22:55:49 up 1 day,  4:26,  2 users,  load average: 0.02, 0.01, 0.00
 	USER     TTY      FROM              LOGIN@   IDLE   JCPU   PCPU WHAT
 	root     tty1     :0               Fri18   28:26m  5.49s  5.49s /usr/bin/Xorg :0 -br -verbose -audit 4 -auth /var/run/gdm/auth-for-gdm-OKs4lX/database -nolisten tcp vt1
 	root     pts/0    192.168.1.104    22:49    0.00s  0.06s  0.01s w
 	----------------------------------------------------------
-	2. who���鿴��½�û���Ϣ������������û��� ��½�ն� ��½ʱ�䣨��½��Դip����
+	2. who，查看登陆用户信息。命令输出：用户名 登陆终端 登陆时间（登陆来源ip）。
 	[root@localhost ~]# who 
 	root     tty1         2017-03-24 18:31 (:0)
 	root     pts/0        2017-03-25 22:49 (192.168.1.104)
 	----------------------------------------------------------
-	3. last����ѯ��ǰ��½�͹�ȥ��½���û���Ϣ������������û��� ��½�ն� ��½ip ��½ʱ�� �ǳ�ʱ�䣬Ĭ�϶�ȡ���� /var/log/wtmp �ļ����ݣ��Ƕ������ļ�����vi�鿴����
+	3. last，查询当前登陆和过去登陆的用户信息。命令输出：用户名 登陆终端 登陆ip 登陆时间 登出时间，默认读取的是 /var/log/wtmp 文件数据（是二进制文件不能vi查看）。
 	[root@localhost ~]# last
 	root     pts/0        192.168.1.104    Sat Mar 25 22:49   still logged in   
 	root     pts/0        192.168.1.104    Sat Mar 25 19:58 - 22:49  (02:50)    
@@ -267,7 +267,7 @@
 	root     pts/0        192.168.1.104    Sat Mar 25 02:47 - 14:29  (11:41)    
 	root     pts/0        192.168.1.102    Fri Mar 24 18:31 - 02:37  (08:05) 
 	----------------------------------------------------------
-	3. lastlog���鿴�����û������һ�ε�½ʱ�䡣����������û��� ��½�ն� ��½ip ���һ�ε�½ʱ�䣬Ĭ�϶�ȡ���� /var/log/lastlog �ļ����ݣ��Ƕ������ļ�����vi�鿴����
+	3. lastlog，查看所有用户的最后一次登陆时间。命令输出：用户名 登陆终端 登陆ip 最后一次登陆时间，默认读取的是 /var/log/lastlog 文件数据（是二进制文件不能vi查看）。
 	[root@localhost ~]# lastlog
 	Username         Port     From             Latest
 	root             pts/0    192.168.1.104    Sat Mar 25 22:49:23 +0800 2017
